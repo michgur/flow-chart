@@ -2,6 +2,7 @@
 
 Use `vp` for everything (never `npm`/`pnpm` directly): `vp add/remove`, `vp dev`, `vp check`, `vp test`, `vp build`.
 Before finishing work, run `vp check` and `vp build`; run `vp test` too (it may exit non-zero if no test files exist yet).
+Use `vp exec` for running local binaries, and `vp dlx` for remote (never `npx`/`pnpx dlx` directly).
 
 ## Project Packages
 
@@ -11,9 +12,22 @@ Before finishing work, run `vp check` and `vp build`; run `vp test` too (it may 
 - `@phosphor-icons/react`: icons.
 - `vite-plus`, `@vitejs/plugin-react`: toolchain/config.
 
-## Research + Implementation Rules
+## Rules
 
-- Always look up library usage in Context7 before implementing or changing framework/library patterns.
-- For React Flow, use controlled state (`useNodesState`/`useEdgesState`) and avoid rebuilding nodes/edges every render.
-- Avoid viewport flashing: do not churn `fitView`; prefer one-time `fitView` on init when needed.
-- Keep contract boundaries clean: container reads/writes only `Script` from `src/data-model.ts`; flow UI state stays internal under `src/flow-chart`.
+- Always look up library usage in context7 before implementing or changing framework/library patterns.
+- HAVE TASTE - the most important rule. Produce simple, readable code, with a minimal code surface, clear contracts, and simple names.
+- Naming - have taste, for example if the component is GoalInput, then the props should be `value` and `onChange(goal)`, not `goalValueItemElement` and `onGoalUpdateChangedGoal(goalItemElement)`. If something could be determined by the context - it shouldn't appear in the variable name.
+- No redundant type checks - if you have a parameter `x: X`, don't check `typeof x === 'object' && 'x_field' in x`. Just assume type correctness.
+- Don't create functions for basic normalizations that should be inlined, e.g.
+
+```
+function normalizeGoalNameForFunIsAwesome(goalName: string | null | undefined) {
+    return goalName === "" ? typeof goal === "string" ? "" : null ? undefined fucks sake
+}
+```
+
+should just be an inline `const normalized = name === "" ? undefined : name ?? undefined` or something like that.
+
+- Same for variables, if it's only used once it could probably be inlined.
+- "You Might Not Need an Effect" - React docs.
+- Complex stateful logic goes in custom hooks.
