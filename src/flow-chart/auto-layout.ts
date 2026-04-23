@@ -1,6 +1,6 @@
 import { Position } from "@xyflow/react";
 import * as dagre from "dagre";
-import type { FlowEdge, FlowNode } from "./adapter";
+import type { FlowEdge, FlowNode } from "./script-adapter";
 
 const LAYOUT_NODE_WIDTH = 220;
 const LAYOUT_NODE_HEIGHT = 56;

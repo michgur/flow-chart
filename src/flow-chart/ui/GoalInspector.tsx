@@ -1,49 +1,39 @@
-import { useCallback, useEffect, useState } from "react";
-import type { Goal } from "../data-model";
-import { GoalNameInput } from "./GoalName";
+import { useCallback, useState } from "react";
+import { GoalNameInput } from "./GoalNameInput";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
+import { useScript, useScriptStore } from "../hooks/use-script";
+import { getGoal, updateGoal } from "../script-actions";
+import type { Goal } from "../data-model";
 
-type GoalInspectorProps = {
-  value: Goal;
-  onChange: (nextGoal: Goal) => void;
-};
+export function GoalInspector({ goalId }: { goalId: string }) {
+  const goal = useScript((script) => getGoal(script, goalId));
+  const [prompt, setPrompt] = useState(goal?.messages ?? "");
 
-export function GoalInspector({ value, onChange }: GoalInspectorProps) {
-  const [messagesInput, setMessagesInput] = useState(value.messages ?? "");
-
-  useEffect(() => {
-    setMessagesInput(value.messages ?? "");
-  }, [value.messages, value.name]);
-
-  const onNameChange = useCallback(
-    (nextGoalName: string) => {
-      onChange({ ...value, name: nextGoalName });
-    },
-    [onChange, value],
+  const store = useScriptStore();
+  const update = useCallback(
+    (change: Partial<Goal>) =>
+      store.set((script) => updateGoal(script, goalId, change)),
+    [goalId],
   );
 
-  const onMessagesBlur = useCallback(
-    (nextGoalMessages: string) => {
-      if ((value.messages ?? "") === nextGoalMessages) {
-        return;
-      }
-
-      onChange({ ...value, messages: nextGoalMessages });
-    },
-    [onChange, value],
-  );
-
+  if (!goal) return null;
   return (
     <section className="space-y-2 text-sm p-2">
-      <GoalNameInput value={value.name} onChange={onNameChange} />
+      <GoalNameInput
+        value={goal.name}
+        onChange={(value) => update({ name: value })}
+      />
 
-      <label className="flex flex-col gap-2 px-2">
-        <span className="text-slate-500">Prompt</span>
+      <label className="flex flex-col gap-2 px-2 pb-10 cursor-text">
+        <span className="text-slate-500 cursor-default">Prompt</span>
         <AutoResizeTextarea
           name="goal-prompt"
-          value={messagesInput}
-          onChange={(event) => setMessagesInput(event.target.value)}
-          onBlur={(event) => onMessagesBlur(event.target.value)}
+          value={prompt}
+          onChange={(event) => setPrompt(event.target.value)}
+          onBlur={(event) => {
+            setPrompt(event.target.value);
+            update({ messages: event.target.value || undefined });
+          }}
           placeholder="Optional prompt context"
           className="w-full resize-none overflow-hidden outline-none"
           spellCheck={true}

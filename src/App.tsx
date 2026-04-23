@@ -1,9 +1,10 @@
 import { useState } from "react";
-import type { Script } from "./flow-chart/data-model";
+import type { Script, ScriptWithoutGoalIds } from "./flow-chart/data-model";
 import { FlowChart } from "./flow-chart";
 import { BracketsCurlyIcon } from "@phosphor-icons/react";
+import { injectGoalIds, pruneGoalIds } from "./flow-chart/script-actions";
 
-const initialModel: Script = {
+const initialModel: ScriptWithoutGoalIds = {
   goals: [
     {
       name: "start",
@@ -40,11 +41,11 @@ const initialModel: Script = {
 };
 
 function App() {
-  const [model, setModel] = useState<Script>(initialModel);
+  const [model, setModel] = useState<Script>(injectGoalIds(initialModel));
 
   return (
     <main className="h-dvh w-dvw relative bg-slate-100 text-slate-700 overflow-hidden">
-      <FlowChart className="size-full" model={model} onModelChange={setModel} />
+      <FlowChart className="size-full" model={model} onChange={setModel} />
 
       <button
         popoverTarget="data-model"
@@ -64,7 +65,7 @@ function App() {
           </h1>
         </header>
         <pre className="flex-1 overflow-auto min-h-0 max-h-full p-4 pb-16 text-xs leading-4 text-slate-600 tracking-tight">
-          {JSON.stringify(model, null, 2)}
+          {JSON.stringify(pruneGoalIds(model), null, 2)}
         </pre>
       </div>
     </main>
