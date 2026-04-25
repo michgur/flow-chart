@@ -9,7 +9,7 @@ import {
   generateGoalId,
   goalDisplayName,
   type GoalFlowNodeData,
-} from "../adapter";
+} from "../script-adapter";
 import { PlusIcon } from "@phosphor-icons/react";
 import { cn } from "../../lib/utils";
 import { useScriptStore } from "../hooks/use-script";
@@ -57,7 +57,7 @@ export function GoalNode({
         className="relative"
         onClick={onAddGoal}
       >
-        <div className="opacity-0 group-hover:opacity-100 absolute top-1/2 inset-s-1/2 -translate-1/2 pointer-events-none border border-slate-50 text-slate-50 bg-slate-900 size-4 flex items-center justify-center rounded-full">
+        <div className="opacity-0 group-hover:opacity-100 absolute top-1/2 inset-s-1/2 -translate-1/2 pointer-events-none border-2 border-slate-50 text-slate-50 bg-slate-900 size-4 flex items-center justify-center rounded-full">
           <PlusIcon weight="bold" size={8} />
         </div>
       </Handle>

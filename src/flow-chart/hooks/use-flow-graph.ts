@@ -1,6 +1,10 @@
 import { useEdgesState, useNodesState } from "@xyflow/react";
 import type { Script } from "../data-model";
-import { extractPositions, modelToGraph, type GraphOptions } from "../adapter";
+import {
+  extractPositions,
+  modelToGraph,
+  type GraphOptions,
+} from "../script-adapter";
 import { useEffect, useEffectEvent } from "react";
 
 export function useFlowGraph(model: Script) {

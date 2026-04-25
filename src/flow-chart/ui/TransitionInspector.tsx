@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { goalDisplayName } from "../adapter";
+import { goalDisplayName } from "../script-adapter";
 import type { Transition, TransitionId } from "../data-model";
 import { useScript, useScriptStore } from "../hooks/use-script";
 import { getGoal, getTransition, updateTransition } from "../script-actions";

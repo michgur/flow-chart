@@ -4,13 +4,12 @@ import {
   BackgroundVariant,
   ControlButton,
   Controls,
-  Panel,
   ReactFlow,
   type ReactFlowInstance,
 } from "@xyflow/react";
 import type { Script } from "./data-model";
-import { type FlowEdge, type FlowNode } from "./adapter";
-import { layoutNodes } from "./layout";
+import { type FlowEdge, type FlowNode } from "./script-adapter";
+import { layoutNodes } from "./auto-layout";
 import { FlowInspector } from "./ui/FlowInspector";
 import { GoalNode } from "./ui/GoalNode";
 import "@xyflow/react/dist/style.css";
@@ -34,14 +33,8 @@ export function FlowChart({ model, onChange, className }: FlowChartProps) {
     useFlowGraph(model);
   const { selection, setSelection, onSelectionChange } =
     useFlowSelection(flowRef);
-  const {
-    onDelete,
-    onConnect,
-    onReconnect,
-    isValidConnection,
-    onUpdateGoal,
-    onUpdateTransition,
-  } = useFlowScriptActions(model, onChange);
+  const { onDelete, onConnect, onReconnect, isValidConnection } =
+    useFlowScriptActions(model, onChange);
 
   const store = useCreateScriptStore(model, onChange, setSelection);
 

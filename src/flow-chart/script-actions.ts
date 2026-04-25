@@ -1,4 +1,4 @@
-import { generateGoalId } from "./adapter";
+import { generateGoalId } from "./script-adapter";
 import type {
   Goal,
   GoalName,

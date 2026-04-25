@@ -7,7 +7,7 @@ import {
   type SetStateAction,
 } from "react";
 import type { OnSelectionChangeFunc } from "@xyflow/react";
-import { GLOBAL_NODE_ID } from "../adapter";
+import { GLOBAL_NODE_ID } from "../script-adapter";
 import type { FlowInstance } from "../FlowChart";
 import type { TransitionId } from "../data-model";
 
@@ -21,32 +21,38 @@ export function useFlowSelection(flowRef: RefObject<FlowInstance | null>) {
   const [selection, setSelectionInternal] = useState<FlowSelection>(null);
   const shouldUpdate = useRef(false);
 
-  const setSelection = useCallback((selection: SetStateAction<FlowSelection>) => {
-    setSelectionInternal(selection);
-    shouldUpdate.current = true;
-  }, []);
+  const setSelection = useCallback(
+    (selection: SetStateAction<FlowSelection>) => {
+      setSelectionInternal(selection);
+      shouldUpdate.current = true;
+    },
+    [],
+  );
 
-  const onSelectionChange = useCallback<OnSelectionChangeFunc>(({ nodes, edges }) => {
-    if (edges.length > 0) {
-      setSelectionInternal({ kind: "transition", id: edges[0] });
-      return;
-    }
-
-    if (nodes.length > 0) {
-      const selectedNode = nodes[0];
-
-      if (selectedNode.id === GLOBAL_NODE_ID) {
-        setSelectionInternal({ kind: "global" });
+  const onSelectionChange = useCallback<OnSelectionChangeFunc>(
+    ({ nodes, edges }) => {
+      if (edges.length > 0) {
+        setSelectionInternal({ kind: "transition", id: edges[0] });
         return;
       }
 
-      setSelectionInternal({ kind: "goal", id: selectedNode.id });
-      return;
-    }
+      if (nodes.length > 0) {
+        const selectedNode = nodes[0];
 
-    setSelectionInternal(null);
-    return;
-  }, []);
+        if (selectedNode.id === GLOBAL_NODE_ID) {
+          setSelectionInternal({ kind: "global" });
+          return;
+        }
+
+        setSelectionInternal({ kind: "goal", id: selectedNode.id });
+        return;
+      }
+
+      setSelectionInternal(null);
+      return;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!shouldUpdate.current) return;
@@ -75,7 +81,9 @@ export function useFlowSelection(flowRef: RefObject<FlowInstance | null>) {
   return { selection, setSelection, onSelectionChange };
 }
 
-function flowSelect<T extends { selected?: boolean }>(predicate: (item: T) => boolean | void) {
+function flowSelect<T extends { selected?: boolean }>(
+  predicate: (item: T) => boolean | void,
+) {
   return (items: T[]) =>
     items.map((item) => {
       const selected = predicate(item);
