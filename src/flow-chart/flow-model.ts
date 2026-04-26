@@ -2,18 +2,20 @@ import type { Edge, Node } from "@xyflow/react";
 import { GoalNode } from "./ui/GoalNode";
 
 export type GoalNodeData = {
-  kind: "goal";
   name: string;
   messages?: string;
 };
-export type AskNodeData = {
-  kind: "ask";
+export type SayNodeData = {
+  static: boolean;
+  prompt: string;
+  waitForResponse: boolean;
 };
-export type FlowNodeData = GoalNodeData | AskNodeData;
+export type AskNodeData = {};
 
 export type GoalNode = Node<GoalNodeData, "goal">;
+export type SayNode = Node<SayNodeData, "say">;
 export type AskNode = Node<AskNodeData, "ask">;
-export type FlowNode = GoalNode | AskNode;
+export type FlowNode = GoalNode | SayNode | AskNode;
 
 export type TransitionEdgeData = {
   kind: "transition";

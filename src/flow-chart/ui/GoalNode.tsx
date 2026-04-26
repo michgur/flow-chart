@@ -1,4 +1,10 @@
-import { Handle, Position, useConnection, useReactFlow, type NodeProps } from "@xyflow/react";
+import {
+  Handle,
+  Position,
+  useConnection,
+  useReactFlow,
+  type NodeProps,
+} from "@xyflow/react";
 import { PlusIcon } from "@phosphor-icons/react";
 import { useCallback } from "react";
 import { cn } from "../../lib/utils";
@@ -35,7 +41,6 @@ export function GoalNode({
         id: nextId,
         type: "goal",
         data: {
-          kind: "goal",
           name: "",
         },
         position: {
@@ -49,7 +54,9 @@ export function GoalNode({
     });
 
     reactFlow.setEdges((edges) => {
-      const hasExisting = edges.some((edge) => edge.source === id && edge.target === nextId);
+      const hasExisting = edges.some(
+        (edge) => edge.source === id && edge.target === nextId,
+      );
       if (hasExisting) return edges;
 
       return [
@@ -77,7 +84,11 @@ export function GoalNode({
         selected && "border-emerald-500 shadow-emerald-950/5",
       )}
     >
-      <Handle type="target" position={Position.Top} className="h-0! min-h-0! border-none!" />
+      <Handle
+        type="target"
+        position={Position.Top}
+        className="h-0! min-h-0! border-none!"
+      />
 
       {connection.inProgress && (
         <Handle

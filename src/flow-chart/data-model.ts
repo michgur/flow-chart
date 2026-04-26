@@ -10,8 +10,9 @@ export type Transition = {
 
 export type Goal = {
   name: GoalName;
+  nodeType: "say" | "ask" | "subagent";
   messages?: string;
-  transitions: Transition[];
+  transitions?: Transition[];
 };
 
 export type Script = {

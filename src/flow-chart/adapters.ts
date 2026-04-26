@@ -1,11 +1,10 @@
 import { layoutNodes } from "./auto-layout";
-import type { Script, Transition } from "./data-model";
+import type { Goal, Script, Transition } from "./data-model";
 import {
   generateTransitionEdgeId,
   type FlowEdge,
   type FlowModel,
   type FlowNode,
-  type GoalNode,
 } from "./flow-model";
 
 export function scriptToFlowModel(script: Script): FlowModel {
@@ -21,21 +20,45 @@ export function scriptToFlowModel(script: Script): FlowModel {
     }
   }
 
-  const nodes = goals.map<FlowNode>((goal) => ({
-    id: goal.id,
-    type: "goal",
-    data: {
-      kind: "goal",
-      name: goal.name,
-      messages: goal.messages,
-    },
-    position: { x: 0, y: 0 },
-  }));
+  const nodes = goals.map<FlowNode>((goal) => {
+    if (goal.nodeType === "say") {
+      return {
+        id: goal.id,
+        type: "say",
+        data: {
+          static: true,
+          waitForResponse: false,
+          prompt: "",
+        },
+        position: { x: 0, y: 0 },
+      };
+    }
+
+    return {
+      id: goal.id,
+      type: "goal",
+      data: {
+        name: goal.name,
+        messages: goal.messages,
+      },
+      position: { x: 0, y: 0 },
+    };
+  });
   const seenPairs = new Set<string>();
   const edges: FlowEdge[] = [];
 
-  for (const goal of goals) {
-    for (const transition of goal.transitions) {
+  for (let i = 0; i < goals.length; i++) {
+    const goal = goals[i];
+    if (i < goals.length - 1 && goal.nodeType === "say") {
+      edges.push({
+        id: generateTransitionEdgeId(),
+        source: idByGoalName.get(goal.name)!,
+        target: idByGoalName.get(goals[i + 1].name)!,
+      });
+      continue;
+    }
+
+    for (const transition of goal.transitions ?? []) {
       const target = idByGoalName.get(transition.target);
       if (!target) continue;
 
@@ -51,42 +74,44 @@ export function scriptToFlowModel(script: Script): FlowModel {
 }
 
 export function flowModelToScript(flow: FlowModel): Script {
-  const goalNodes = flow.nodes.filter((node) => node.data.kind === "goal");
+  const goalNodes = flow.nodes.filter((node) => node.type === "goal");
   const nameByGoalId = new Map<string, string>();
 
   for (const node of goalNodes) {
-    if (node.data.kind !== "goal") continue;
     nameByGoalId.set(node.id, node.data.name);
   }
 
-  const goals = goalNodes
-    .filter((node): node is GoalNode => node.data.kind === "goal")
-    .map((node) => {
-      const seenTargets = new Set<string>();
-      const transitions = flow.edges.flatMap((edge) => {
-        if (edge.source !== node.id) return [];
-        if (seenTargets.has(edge.target)) return [];
+  const goals = goalNodes.map<Goal>((node) => {
+    const seenTargets = new Set<string>();
+    const transitions = flow.edges.flatMap((edge) => {
+      if (edge.source !== node.id) return [];
+      if (seenTargets.has(edge.target)) return [];
 
-        const target = nameByGoalId.get(edge.target);
-        if (!target) return [];
+      const target = nameByGoalId.get(edge.target);
+      if (!target) return [];
 
-        seenTargets.add(edge.target);
-        return edgeToTransition(edge, target);
-      });
-
-      return {
-        name: node.data.name,
-        messages: node.data.messages,
-        transitions,
-      };
+      seenTargets.add(edge.target);
+      return edgeToTransition(edge, target);
     });
+
+    return {
+      name: node.data.name,
+      nodeType: "say",
+      messages: node.data.messages,
+      transitions,
+    };
+  });
 
   return {
     goals,
   };
 }
 
-function transitionToEdge(source: string, target: string, transition: Transition): FlowEdge {
+function transitionToEdge(
+  source: string,
+  target: string,
+  transition: Transition,
+): FlowEdge {
   return {
     id: generateTransitionEdgeId(),
     source,

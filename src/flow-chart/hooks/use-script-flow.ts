@@ -12,7 +12,11 @@ import {
 } from "@xyflow/react";
 import type { Script } from "../data-model";
 import { flowModelToScript, scriptToFlowModel } from "../adapters";
-import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
+import {
+  generateTransitionEdgeId,
+  type FlowEdge,
+  type FlowNode,
+} from "../flow-model";
 
 type OnChange = (next: Script) => void;
 
@@ -78,7 +82,14 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
   const onConnect: OnConnect = useCallback(
     (connection) =>
       setEdges((edges) => {
-        const next = [...edges, newEdge(connection.source, connection.target)];
+        const next = [
+          ...edges,
+          {
+            id: generateTransitionEdgeId(),
+            source: connection.source,
+            target: connection.target,
+          },
+        ];
         emit(nodes, next);
         return next;
       }),
@@ -123,19 +134,4 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
     onReconnect,
     isValidConnection,
   } as const;
-}
-
-function newEdge(source: string, target: string): FlowEdge {
-  return {
-    id: generateTransitionEdgeId(),
-    source,
-    target,
-    label: "transition",
-    data: {
-      kind: "transition" as const,
-      name: "transition",
-      conditions: "",
-    },
-    animated: true,
-  };
 }

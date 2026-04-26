@@ -7,34 +7,15 @@ const initialModel: Script = {
   goals: [
     {
       name: "start",
-      transitions: [
-        {
-          name: "to-collect-details",
-          target: "collect-details",
-          conditions: "customer says hello",
-        },
-      ],
+      nodeType: "say",
     },
     {
       name: "collect-details",
-      transitions: [
-        {
-          name: "to-done",
-          target: "done",
-          prompt: "Summarize details and confirm",
-        },
-      ],
+      nodeType: "say",
     },
     {
       name: "done",
-      transitions: [],
-    },
-  ],
-  transitions: [
-    {
-      name: "end-conversation",
-      target: "done",
-      prompt: "End conversation politely",
+      nodeType: "say",
     },
   ],
 };
