@@ -1,4 +1,3 @@
-import { useCallback, useRef, useState } from "react";
 import {
   type OnConnect,
   type OnReconnect,
@@ -10,13 +9,11 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "@xyflow/react";
-import type { Script } from "../data-model";
+import { useCallback, useRef, useState } from "react";
+
 import { flowModelToScript, scriptToFlowModel } from "../adapters";
-import {
-  generateTransitionEdgeId,
-  type FlowEdge,
-  type FlowNode,
-} from "../flow-model";
+import type { Script } from "../data-model";
+import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
 
 type OnChange = (next: Script) => void;
 
@@ -83,11 +80,17 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
     (connection) =>
       setEdges((edges) => {
         const next = [
-          ...edges,
+          ...edges.filter(
+            (edge) =>
+              edge.source !== connection.source ||
+              (edge.sourceHandle ?? null) !== (connection.sourceHandle ?? null),
+          ),
           {
             id: generateTransitionEdgeId(),
             source: connection.source,
+            sourceHandle: connection.sourceHandle ?? null,
             target: connection.target,
+            targetHandle: connection.targetHandle ?? null,
           },
         ];
         emit(nodes, next);
@@ -97,26 +100,35 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
   );
 
   const isValidConnection: IsValidConnection<FlowEdge> = useCallback(
-    (connection) => {
-      const { source, target } = connection;
-      if (source === target) return false;
-      return !edges.some((e) => e.source === source && e.target === target);
-    },
-    [edges],
+    (connection) => connection.source !== connection.target,
+    [],
   );
 
   const onReconnect: OnReconnect<FlowEdge> = useCallback(
     (oldEdge, nextConnection) =>
       setEdges((edges) => {
-        const next = edges.map((edge) =>
-          edge.id === oldEdge.id
-            ? {
+        const next = edges.flatMap((edge) => {
+          if (edge.id === oldEdge.id) {
+            return [
+              {
                 ...edge,
                 source: nextConnection.source,
+                sourceHandle: nextConnection.sourceHandle ?? null,
                 target: nextConnection.target,
-              }
-            : edge,
-        );
+                targetHandle: nextConnection.targetHandle ?? null,
+              },
+            ];
+          }
+
+          if (
+            edge.source === nextConnection.source &&
+            (edge.sourceHandle ?? null) === (nextConnection.sourceHandle ?? null)
+          ) {
+            return [];
+          }
+
+          return [edge];
+        });
         emit(nodes, next);
         return next;
       }),

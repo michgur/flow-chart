@@ -26,9 +26,27 @@ export function scriptToFlowModel(script: Script): FlowModel {
         id: goal.id,
         type: "say",
         data: {
+          name: goal.name,
           static: true,
           waitForResponse: false,
           prompt: "",
+        },
+        position: { x: 0, y: 0 },
+      };
+    }
+    if (goal.nodeType === "ask") {
+      return {
+        id: goal.id,
+        type: "ask",
+        data: {
+          name: goal.name,
+          static: true,
+          waitForResponse: false,
+          prompt: "",
+          field: {
+            name: goal.name,
+            type: "boolean",
+          },
         },
         position: { x: 0, y: 0 },
       };
@@ -107,11 +125,7 @@ export function flowModelToScript(flow: FlowModel): Script {
   };
 }
 
-function transitionToEdge(
-  source: string,
-  target: string,
-  transition: Transition,
-): FlowEdge {
+function transitionToEdge(source: string, target: string, transition: Transition): FlowEdge {
   return {
     id: generateTransitionEdgeId(),
     source,

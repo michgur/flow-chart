@@ -1,5 +1,6 @@
-import { useNodesData, useReactFlow, useStore } from "@xyflow/react";
 import { ArrowRightIcon } from "@phosphor-icons/react";
+import { useNodesData, useReactFlow, useStore } from "@xyflow/react";
+
 import {
   goalDisplayName,
   type FlowEdge,
@@ -15,13 +16,13 @@ export function TransitionInspector({ id }: { id: string }) {
   );
 
   const nodes = useNodesData<FlowNode>(edge ? [edge.source, edge.target] : []);
-  const source = nodes.at(0)?.data;
-  const target = nodes.at(1)?.data;
+  const source = nodes.at(0);
+  const target = nodes.at(1);
 
   if (!edge) return null;
 
-  const sourceLabel = source?.kind === "goal" ? goalDisplayName(source.name) : "";
-  const targetLabel = target?.kind === "goal" ? goalDisplayName(target.name) : "";
+  const sourceLabel = source?.type === "goal" ? goalDisplayName(source.data.name) : "";
+  const targetLabel = target?.type === "goal" ? goalDisplayName(target.data.name) : "";
 
   const hasPrompt = edge.data?.prompt !== undefined;
 

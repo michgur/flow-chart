@@ -1,4 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
+
 import { GoalNode } from "./ui/GoalNode";
 
 export type GoalNodeData = {
@@ -6,11 +7,29 @@ export type GoalNodeData = {
   messages?: string;
 };
 export type SayNodeData = {
+  name: string;
   static: boolean;
   prompt: string;
   waitForResponse: boolean;
 };
-export type AskNodeData = {};
+
+export type NodeExit = {
+  name: string;
+  conditions?: string;
+  acknowledge?: string;
+};
+
+export type AskNodeData = {
+  name: string;
+  static: boolean;
+  prompt: string;
+  field: {
+    name: string;
+    type: "boolean" | "enum";
+    enum?: string[];
+    optional?: boolean;
+  };
+};
 
 export type GoalNode = Node<GoalNodeData, "goal">;
 export type SayNode = Node<SayNodeData, "say">;

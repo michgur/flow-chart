@@ -11,6 +11,7 @@
     "prepare": "vp config"
   },
   "dependencies": {
+    "@base-ui/react": "^1.4.1",
     "@phosphor-icons/react": "^2.1.10",
     "@xyflow/react": "^12.10.2",
     "clsx": "^2.1.1",

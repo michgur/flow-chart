@@ -1,4 +1,3 @@
-import { type Dispatch, type SetStateAction } from "react";
 import {
   Background,
   BackgroundVariant,
@@ -6,13 +5,16 @@ import {
   ReactFlow,
   type ReactFlowInstance,
 } from "@xyflow/react";
+import { type Dispatch, type SetStateAction } from "react";
+
 import "@xyflow/react/dist/style.css";
 import type { Script } from "./data-model";
 import { type FlowEdge, type FlowNode } from "./flow-model";
-import { GoalNode } from "./ui/GoalNode";
-import { FlowInspector } from "./ui/FlowInspector";
 import { useScriptFlow } from "./hooks/use-script-flow";
 import { AutoLayoutButton } from "./ui/AutoLayoutButton";
+import { FlowInspector } from "./ui/FlowInspector";
+import { GoalNode } from "./ui/GoalNode";
+import { AskNode } from "./ui/nodes/AskNode";
 import { SayNode } from "./ui/nodes/SayNode";
 
 export type FlowChartProps = {
@@ -23,18 +25,11 @@ export type FlowChartProps = {
 
 export type FlowInstance = ReactFlowInstance<FlowNode, FlowEdge>;
 
-const nodeTypes = { goal: GoalNode, say: SayNode };
+const nodeTypes = { goal: GoalNode, say: SayNode, ask: AskNode };
 
 export function FlowChart({ model, onChange, className }: FlowChartProps) {
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    onReconnect,
-    isValidConnection,
-  } = useScriptFlow(model, onChange);
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onReconnect, isValidConnection } =
+    useScriptFlow(model, onChange);
 
   return (
     <ReactFlow<FlowNode, FlowEdge>

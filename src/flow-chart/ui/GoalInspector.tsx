@@ -1,8 +1,9 @@
 import { useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
+
 import { type FlowEdge, type FlowNode, type GoalNode } from "../flow-model";
-import { GoalNameInput } from "./GoalNameInput";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
+import { GoalNameInput } from "./GoalNameInput";
 
 export function GoalInspector({ id }: { id: string }) {
   const { updateNodeData } = useReactFlow<FlowNode, FlowEdge>();
@@ -14,11 +15,11 @@ export function GoalInspector({ id }: { id: string }) {
 
   if (!goal) return null;
   return (
-    <section className="space-y-2 text-sm p-2">
+    <section className="space-y-2 p-2 text-sm">
       <GoalNameInput value={goal.name} onChange={(name) => updateNodeData(id, { name })} />
 
-      <label className="flex flex-col gap-2 px-2 pb-10 cursor-text">
-        <span className="text-slate-500 cursor-default">Prompt</span>
+      <label className="flex cursor-text flex-col gap-2 px-2 pb-10">
+        <span className="cursor-default text-slate-500">Prompt</span>
         <AutoResizeTextarea
           name="goal-prompt"
           value={prompt}

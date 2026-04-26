@@ -1,11 +1,9 @@
-import {
-  Panel,
-  useOnSelectionChange,
-  type OnSelectionChangeFunc,
-} from "@xyflow/react";
+import { Panel, useOnSelectionChange, type OnSelectionChangeFunc } from "@xyflow/react";
+import { useCallback, useState } from "react";
+
 import { type FlowNode } from "../flow-model";
 import { GoalInspector } from "./GoalInspector";
-import { useCallback, useState } from "react";
+import { AskInspector } from "./inspector/AskInspector";
 import { SayInspector } from "./inspector/SayInspector";
 
 export function FlowInspector() {
@@ -20,16 +18,23 @@ export function FlowInspector() {
 
   if (!selection) return null;
 
+  const inspector =
+    selection.type === "goal" ? (
+      <GoalInspector id={selection.id} />
+    ) : selection.type === "say" ? (
+      <SayInspector id={selection.id} />
+    ) : selection.type === "ask" ? (
+      <AskInspector id={selection.id} />
+    ) : null;
+
+  if (!inspector) return null;
+
   return (
     <Panel
       position="top-right"
       className="inset-3! inset-s-auto! m-0! w-80 space-y-3 overflow-y-auto rounded-md border border-slate-300 bg-slate-50"
     >
-      {selection.type === "goal" ? (
-        <GoalInspector id={selection.id} />
-      ) : (
-        <SayInspector id={selection.id} />
-      )}
+      {inspector}
     </Panel>
   );
 }

@@ -1,6 +1,7 @@
-import { useCallback } from "react";
-import { ControlButton, useReactFlow } from "@xyflow/react";
 import { PaintBrushBroadIcon } from "@phosphor-icons/react/dist/ssr";
+import { ControlButton, useReactFlow } from "@xyflow/react";
+import { useCallback } from "react";
+
 import { layoutNodes } from "../auto-layout";
 import type { FlowEdge, FlowNode } from "../flow-model";
 
