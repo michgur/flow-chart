@@ -1,45 +1,51 @@
-import { useCallback } from "react";
-import { goalDisplayName } from "../script-adapter";
-import type { Transition, TransitionId } from "../data-model";
-import { useScript, useScriptStore } from "../hooks/use-script";
-import { getGoal, getTransition, updateTransition } from "../script-actions";
-import { GoalNameInput } from "./GoalNameInput";
+import { useNodesData, useReactFlow, useStore } from "@xyflow/react";
 import { ArrowRightIcon } from "@phosphor-icons/react";
+import {
+  goalDisplayName,
+  type FlowEdge,
+  type FlowNode,
+  type TransitionEdgeData,
+} from "../flow-model";
+import { GoalNameInput } from "./GoalNameInput";
 
-export function TransitionInspector({
-  transitionId,
-}: {
-  transitionId: TransitionId;
-}) {
-  const transition = useScript((script) => getTransition(script, transitionId));
-  const store = useScriptStore();
-
-  const update = useCallback(
-    (change: Partial<Transition>) =>
-      store.set((script) => updateTransition(script, transitionId, change)),
-    [transitionId],
+export function TransitionInspector({ id }: { id: string }) {
+  const { updateEdge } = useReactFlow<FlowNode, FlowEdge>();
+  const edge = useStore(
+    (state) => state.edges.find((item) => item.id === id) as FlowEdge | undefined,
   );
 
-  const source = useScript((script) =>
-    transitionId.source ? getGoal(script, transitionId.source) : undefined,
-  );
-  const target = useScript((script) => getGoal(script, transitionId.target));
+  const nodes = useNodesData<FlowNode>(edge ? [edge.source, edge.target] : []);
+  const source = nodes.at(0)?.data;
+  const target = nodes.at(1)?.data;
 
-  console.log(transitionId, transition);
-  if (!transition) return null;
-  const hasPrompt = transition.prompt !== undefined;
+  if (!edge) return null;
+
+  const sourceLabel = source?.kind === "goal" ? goalDisplayName(source.name) : "";
+  const targetLabel = target?.kind === "goal" ? goalDisplayName(target.name) : "";
+
+  const hasPrompt = edge.data?.prompt !== undefined;
+
+  const update = (change: Partial<TransitionEdgeData>) =>
+    updateEdge(id, (current) => {
+      const data = {
+        ...(current.data ?? { kind: "transition", name: "transition" }),
+        ...change,
+      };
+      return {
+        data,
+        label: data.name,
+      };
+    });
   return (
     <section className="space-y-2 px-2 py-4">
       <h3 className="flex items-center gap-1 px-2 text-base font-medium text-slate-700">
-        <span>
-          {source ? goalDisplayName(source.name) : "Global transition"}
-        </span>
+        <span>{sourceLabel}</span>
         <ArrowRightIcon weight="bold" />
-        <span>{goalDisplayName(target?.name ?? "")}</span>
+        <span>{targetLabel}</span>
       </h3>
 
       <GoalNameInput
-        value={transition.name}
+        value={edge.data?.name ?? "transition"}
         onChange={(name) => update({ name })}
         placeholder="transition-name"
       />
@@ -48,10 +54,10 @@ export function TransitionInspector({
         <span className="text-slate-500">Type</span>
         <select
           value={hasPrompt ? "prompt" : "conditions"}
-          onChange={(e) =>
+          onChange={(event) =>
             update(
-              e.target.value === "prompt"
-                ? { prompt: transition.prompt ?? "" }
+              event.target.value === "prompt"
+                ? { prompt: edge.data?.prompt ?? "" }
                 : { prompt: undefined },
             )
           }
@@ -65,8 +71,12 @@ export function TransitionInspector({
       <label className="block space-y-1">
         <span className="text-slate-500">Conditions</span>
         <input
-          value={transition.conditions ?? ""}
-          onChange={(e) => update({ conditions: e.target.value || undefined })}
+          value={edge.data?.conditions ?? ""}
+          onChange={(event) =>
+            update({
+              conditions: event.target.value || undefined,
+            })
+          }
           className="w-full rounded border border-slate-300 px-2 py-1"
         />
       </label>
@@ -75,8 +85,12 @@ export function TransitionInspector({
         <label className="block space-y-1">
           <span className="text-slate-500">Prompt</span>
           <input
-            value={transition.prompt ?? ""}
-            onChange={(e) => update({ prompt: e.target.value || undefined })}
+            value={edge.data?.prompt ?? ""}
+            onChange={(event) =>
+              update({
+                prompt: event.target.value || undefined,
+              })
+            }
             className="w-full rounded border border-slate-300 px-2 py-1"
           />
         </label>

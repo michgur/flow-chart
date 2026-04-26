@@ -6,12 +6,7 @@ type GoalNameInputProps = {
   onChange: (value: string) => void;
 } & Omit<InputHTMLAttributes<HTMLInputElement>, "onChange">;
 
-export function GoalNameInput({
-  value,
-  onChange,
-  className,
-  ...props
-}: GoalNameInputProps) {
+export function GoalNameInput({ value, onChange, className, ...props }: GoalNameInputProps) {
   return (
     <input
       name="goal-name"

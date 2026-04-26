@@ -1,28 +1,21 @@
-import { useCallback, useState } from "react";
+import { useNodesData, useReactFlow } from "@xyflow/react";
+import { useEffect, useState } from "react";
+import { type FlowEdge, type FlowNode, type GoalNode } from "../flow-model";
 import { GoalNameInput } from "./GoalNameInput";
 import { AutoResizeTextarea } from "./AutoResizeTextarea";
-import { useScript, useScriptStore } from "../hooks/use-script";
-import { getGoal, updateGoal } from "../script-actions";
-import type { Goal } from "../data-model";
 
-export function GoalInspector({ goalId }: { goalId: string }) {
-  const goal = useScript((script) => getGoal(script, goalId));
+export function GoalInspector({ id }: { id: string }) {
+  const { updateNodeData } = useReactFlow<FlowNode, FlowEdge>();
+  const node = useNodesData<GoalNode>(id);
+  const goal = node?.data;
+
   const [prompt, setPrompt] = useState(goal?.messages ?? "");
-
-  const store = useScriptStore();
-  const update = useCallback(
-    (change: Partial<Goal>) =>
-      store.set((script) => updateGoal(script, goalId, change)),
-    [goalId],
-  );
+  useEffect(() => setPrompt(goal?.messages ?? ""), [goal?.messages, id]);
 
   if (!goal) return null;
   return (
     <section className="space-y-2 text-sm p-2">
-      <GoalNameInput
-        value={goal.name}
-        onChange={(value) => update({ name: value })}
-      />
+      <GoalNameInput value={goal.name} onChange={(name) => updateNodeData(id, { name })} />
 
       <label className="flex flex-col gap-2 px-2 pb-10 cursor-text">
         <span className="text-slate-500 cursor-default">Prompt</span>
@@ -31,8 +24,9 @@ export function GoalInspector({ goalId }: { goalId: string }) {
           value={prompt}
           onChange={(event) => setPrompt(event.target.value)}
           onBlur={(event) => {
+            const messages = event.target.value || undefined;
             setPrompt(event.target.value);
-            update({ messages: event.target.value || undefined });
+            updateNodeData(id, { messages });
           }}
           placeholder="Optional prompt context"
           className="w-full resize-none overflow-hidden outline-none"

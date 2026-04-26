@@ -1,34 +1,74 @@
-import {
-  Handle,
-  Position,
-  useConnection,
-  type Node,
-  type NodeProps,
-} from "@xyflow/react";
-import {
-  generateGoalId,
-  goalDisplayName,
-  type GoalFlowNodeData,
-} from "../script-adapter";
+import { Handle, Position, useConnection, useReactFlow, type NodeProps } from "@xyflow/react";
 import { PlusIcon } from "@phosphor-icons/react";
-import { cn } from "../../lib/utils";
-import { useScriptStore } from "../hooks/use-script";
-import { addGoalAfter } from "../script-actions";
 import { useCallback } from "react";
+import { cn } from "../../lib/utils";
+import {
+  generateGoalNodeId,
+  generateTransitionEdgeId,
+  goalDisplayName,
+  type FlowEdge,
+  type FlowNode,
+  type GoalNode,
+} from "../flow-model";
 
 export function GoalNode({
+  id,
   data,
   selected,
-}: NodeProps<Node<GoalFlowNodeData>>) {
+  positionAbsoluteX,
+  positionAbsoluteY,
+}: NodeProps<GoalNode>) {
   const connection = useConnection();
-  const store = useScriptStore();
-  const label = goalDisplayName(data.goal.name);
+  const reactFlow = useReactFlow<FlowNode, FlowEdge>();
+  const label = goalDisplayName(data.name);
 
   const onAddGoal = useCallback(() => {
-    const id = generateGoalId();
-    store.set((model) => addGoalAfter(model, data.goal.id, { id }));
-    store.select({ kind: "goal", id });
-  }, []);
+    const nextId = generateGoalNodeId();
+
+    reactFlow.setNodes((nodes) => {
+      const next: FlowNode[] = nodes.map((node) => ({
+        ...node,
+        selected: false,
+      }));
+
+      next.push({
+        id: nextId,
+        type: "goal",
+        data: {
+          kind: "goal",
+          name: "",
+        },
+        position: {
+          x: positionAbsoluteX,
+          y: positionAbsoluteY + 120,
+        },
+        selected: true,
+      });
+
+      return next;
+    });
+
+    reactFlow.setEdges((edges) => {
+      const hasExisting = edges.some((edge) => edge.source === id && edge.target === nextId);
+      if (hasExisting) return edges;
+
+      return [
+        ...edges,
+        {
+          id: generateTransitionEdgeId(),
+          source: id,
+          target: nextId,
+          label: "transition",
+          data: {
+            kind: "transition",
+            name: "transition",
+            conditions: "",
+          },
+          animated: true,
+        },
+      ];
+    });
+  }, [id, positionAbsoluteX, positionAbsoluteY, reactFlow]);
 
   return (
     <div
@@ -37,11 +77,8 @@ export function GoalNode({
         selected && "border-emerald-500 shadow-emerald-950/5",
       )}
     >
-      <Handle
-        type="target"
-        position={Position.Top}
-        className="h-0! min-h-0! border-none!"
-      />
+      <Handle type="target" position={Position.Top} className="h-0! min-h-0! border-none!" />
+
       {connection.inProgress && (
         <Handle
           type="target"
@@ -49,7 +86,9 @@ export function GoalNode({
           className="inset-0! size-auto! absolute! opacity-0 transform-none! rounded-none!"
         />
       )}
+
       <div className="font-medium text-slate-700">{label}</div>
+
       <Handle
         type="source"
         position={Position.Bottom}
