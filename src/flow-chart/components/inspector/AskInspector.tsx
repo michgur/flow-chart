@@ -3,11 +3,14 @@ import { useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
 
 import { type AskNode, type FlowEdge } from "../../flow-model";
-import { AutoResizeTextarea } from "../AutoResizeTextarea";
-import { ComboboxSelect, type ComboboxSelectOption } from "../ComboboxSelect";
-import { EnumInput } from "../EnumInput";
+import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
+import {
+  ComboboxSelect,
+  type ComboboxSelectOption,
+} from "../ui/ComboboxSelect";
+import { EnumInput } from "../ui/EnumInput";
 import { GoalNameInput } from "../GoalNameInput";
-import { Switch } from "../Switch";
+import { Switch } from "../ui/Switch";
 import { ToggleGroup, type ToggleOption } from "../ToggleGroup";
 
 type AskMode = "script" | "prompt";
@@ -41,7 +44,10 @@ export function AskInspector({ id }: { id: string }) {
 
   return (
     <section className="space-y-3 p-3 text-sm">
-      <label htmlFor="ask-name" className="grid cursor-text grid-cols-[auto_1fr] items-center">
+      <label
+        htmlFor="ask-name"
+        className="grid cursor-text grid-cols-[auto_1fr] items-center"
+      >
         <QuestionMarkIcon className="size-6" weight="duotone" />
         <GoalNameInput id="ask-name" value={data.name} onChange={updateName} />
         <span className="col-start-2 px-2 text-xs text-slate-400">
@@ -113,7 +119,9 @@ export function AskInspector({ id }: { id: string }) {
       <Switch
         label="Answer is optional"
         value={data.field.optional ?? false}
-        onChange={(optional) => updateField({ ...data.field, optional: optional || undefined })}
+        onChange={(optional) =>
+          updateField({ ...data.field, optional: optional || undefined })
+        }
         className="-mx-2 px-2 font-medium"
       />
     </section>

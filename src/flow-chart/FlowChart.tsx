@@ -11,11 +11,11 @@ import "@xyflow/react/dist/style.css";
 import type { Script } from "./data-model";
 import { type FlowEdge, type FlowNode } from "./flow-model";
 import { useScriptFlow } from "./hooks/use-script-flow";
-import { AutoLayoutButton } from "./ui/AutoLayoutButton";
-import { FlowInspector } from "./ui/FlowInspector";
-import { GoalNode } from "./ui/GoalNode";
-import { AskNode } from "./ui/nodes/AskNode";
-import { SayNode } from "./ui/nodes/SayNode";
+import { AutoLayoutButton } from "./components/AutoLayoutButton";
+import { FlowInspector } from "./components/FlowInspector";
+import { GoalNode } from "./components/GoalNode";
+import { AskNode } from "./components/nodes/AskNode";
+import { SayNode } from "./components/nodes/SayNode";
 
 export type FlowChartProps = {
   model: Script;
@@ -28,8 +28,15 @@ export type FlowInstance = ReactFlowInstance<FlowNode, FlowEdge>;
 const nodeTypes = { goal: GoalNode, say: SayNode, ask: AskNode };
 
 export function FlowChart({ model, onChange, className }: FlowChartProps) {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onReconnect, isValidConnection } =
-    useScriptFlow(model, onChange);
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    onReconnect,
+    isValidConnection,
+  } = useScriptFlow(model, onChange);
 
   return (
     <ReactFlow<FlowNode, FlowEdge>

@@ -1,7 +1,5 @@
 import type { Edge, Node } from "@xyflow/react";
 
-import { GoalNode } from "./ui/GoalNode";
-
 export type GoalNodeData = {
   name: string;
   messages?: string;
