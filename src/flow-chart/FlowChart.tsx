@@ -14,6 +14,7 @@ import { GoalNode } from "./components/GoalNode";
 import { AskNode } from "./components/nodes/AskNode";
 import { ExitNode } from "./components/nodes/ExitNode";
 import { SayNode } from "./components/nodes/SayNode";
+import { SubagentNode } from "./components/nodes/SubagentNode";
 import type { Script } from "./data-model";
 import { type FlowEdge, type FlowNode } from "./flow-model";
 import { useScriptFlow } from "./hooks/use-script-flow";
@@ -26,7 +27,13 @@ export type FlowChartProps = {
 
 export type FlowInstance = ReactFlowInstance<FlowNode, FlowEdge>;
 
-const nodeTypes = { goal: GoalNode, say: SayNode, ask: AskNode, exit: ExitNode };
+const nodeTypes = {
+  goal: GoalNode,
+  say: SayNode,
+  ask: AskNode,
+  subagent: SubagentNode,
+  exit: ExitNode,
+};
 
 export function FlowChart({ model, onChange, className }: FlowChartProps) {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onReconnect, isValidConnection } =

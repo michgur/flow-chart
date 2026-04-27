@@ -5,6 +5,7 @@ import { type FlowNode } from "../flow-model";
 import { GoalInspector } from "./GoalInspector";
 import { AskInspector } from "./inspector/AskInspector";
 import { SayInspector } from "./inspector/SayInspector";
+import { SubagentInspector } from "./inspector/SubagentInspector";
 
 export function FlowInspector() {
   const [selection, setSelection] = useState<FlowNode | null>(null);
@@ -25,6 +26,8 @@ export function FlowInspector() {
       <SayInspector id={selection.id} />
     ) : selection.type === "ask" ? (
       <AskInspector id={selection.id} />
+    ) : selection.type === "subagent" ? (
+      <SubagentInspector id={selection.id} />
     ) : null;
 
   if (!inspector) return null;

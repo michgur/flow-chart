@@ -3,7 +3,7 @@ import type { FlowEdge, FlowModel, FlowNode } from "./flow-model";
 const exitSize = 16;
 
 function nodeExits(node: FlowNode) {
-  return node.type === "ask" ? node.data.exits : [];
+  return node.type === "ask" || node.type === "subagent" ? node.data.exits : [];
 }
 
 function exitNodeId(source: string, handle: string): string {
@@ -23,23 +23,15 @@ function exitPosition(node: FlowNode, index: number, count: number) {
   const height = node.measured?.height ?? 96;
 
   return {
-    x:
-      node.position.x +
-      width / 2 +
-      (index - (count - 1) / 2) * (width / 2) -
-      exitSize / 2,
+    x: node.position.x + width / 2 + (index - (count - 1) / 2) * (width / 2) - exitSize / 2,
     y: node.position.y + height + 72,
   };
 }
 
 export function syncExits(flow: FlowModel): FlowModel {
-  const exitIds = new Set(
-    flow.nodes.filter((node) => node.type === "exit").map((node) => node.id),
-  );
+  const exitIds = new Set(flow.nodes.filter((node) => node.type === "exit").map((node) => node.id));
   const exitsById = new Map(
-    flow.nodes
-      .filter((node) => node.type === "exit")
-      .map((node) => [node.id, node]),
+    flow.nodes.filter((node) => node.type === "exit").map((node) => [node.id, node]),
   );
   const collapsedEdgeIds = new Set<string>();
   const directEdges: FlowEdge[] = [];
@@ -67,10 +59,10 @@ export function syncExits(flow: FlowModel): FlowModel {
   const sourceExits = new Map(
     flow.nodes
       .filter((node) => node.type !== "exit")
-      .map((node) => [
-        node.id,
-        new Set(nodeExits(node).map((exit) => exit.name)),
-      ]),
+      .map((node) => [node.id, new Set(nodeExits(node).map((exit) => exit.name))]),
+  );
+  const multiTargetSources = new Set(
+    flow.nodes.filter((node) => node.type === "subagent").map((node) => node.id),
   );
   const connected = new Set<string>();
   const realEdges = [
@@ -89,7 +81,7 @@ export function syncExits(flow: FlowModel): FlowModel {
     }
 
     const key = exitKey(edge.source, handle);
-    if (connected.has(key)) continue;
+    if (!multiTargetSources.has(edge.source) && connected.has(key)) continue;
 
     connected.add(key);
     edges.push({

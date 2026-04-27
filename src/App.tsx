@@ -3,13 +3,10 @@ import { useState } from "react";
 
 import { FlowChart } from "./flow-chart";
 import type { Script } from "./flow-chart/data-model";
-import { flowModelToScript } from "./flow-chart/adapters";
-import sampleFlowModel from "./sample";
-
-const initialModel = flowModelToScript(sampleFlowModel);
+import { sampleScript } from "./sample-script";
 
 function App() {
-  const [model, setModel] = useState<Script>(initialModel);
+  const [model, setModel] = useState<Script>(sampleScript);
 
   return (
     <main className="relative h-dvh w-dvw overflow-hidden bg-slate-100 text-slate-700">

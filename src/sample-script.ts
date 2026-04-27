@@ -1,0 +1,287 @@
+import type { Script } from "./flow-chart/data-model";
+
+export const sampleScript: Script = {
+  goals: [
+    {
+      name: "intro",
+      goal_type: "say",
+      messages:
+        "I saw you reached out regarding {description/improving your workflows} — how are you doing today?",
+      transitions: [
+        {
+          name: "next",
+          target: "main need",
+        },
+      ],
+    },
+    {
+      name: "main need",
+      goal_type: "ask_generative",
+      value_type: "selection",
+      messages:
+        "The goal for today is just to clarify a few details so I can connect you to the right product consultant. By the way, this call is recorded. Start by asking the user, in their own words, what was the main trigger that brought them to monday. Continue inquiring to understand their main business objective, level of urgency, and maturity of their process.",
+      transitions: [
+        {
+          name: "next",
+          target: "product type",
+        },
+      ],
+    },
+    {
+      name: "product type",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "Are you primarily looking for a CRM, Development, Service, or general Work Management solution?",
+      choices: [
+        { name: "CRM" },
+        { name: "Dev" },
+        { name: "Service" },
+        { name: "Work Mgmt" },
+      ],
+      transitions: [
+        {
+          name: "next",
+          target: "prospect type",
+        },
+      ],
+    },
+    {
+      name: "prospect type",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "Are you just browsing and exploring right now, or do you have a specific, urgent use-case you are trying to solve?",
+      choices: [{ name: "Explorer" }, { name: "Sprinter" }],
+      transitions: [
+        {
+          name: "next",
+          target: "workflow pain point",
+        },
+      ],
+    },
+    {
+      name: "workflow pain point",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "What’s the specific breaking point in your current process that you're hoping to address with monday?",
+      transitions: [
+        {
+          name: "next",
+          target: "current tools",
+        },
+      ],
+    },
+    {
+      name: "current tools",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "What tools or software are you currently using to run this process today?",
+      transitions: [
+        {
+          name: "to_gap",
+          target: "current tools gap",
+          conditions: "current tools $any and prospect type = Explorer",
+        },
+        {
+          name: "to_user_count",
+          target: "user count",
+        },
+      ],
+    },
+    {
+      name: "current tools gap",
+      goal_type: "ask",
+      value_type: "selection",
+      messages: "What's missing or not working with that setup today?",
+      transitions: [
+        {
+          name: "next",
+          target: "user count",
+        },
+      ],
+    },
+    {
+      name: "user count",
+      goal_type: "ask",
+      value_type: "selection",
+      messages: "How many people would use monday day to day?",
+      transitions: [
+        {
+          name: "clarify_range",
+          target: "user count range clarification",
+          conditions: "!User provided a single number",
+        },
+        {
+          name: "check_expansion",
+          target: "workflow collaboration scope",
+          conditions: "user count < {number_of_users_to_qualify}",
+        },
+        {
+          name: "route",
+          target: "qualification routing",
+        },
+      ],
+    },
+    {
+      name: "user count range clarification",
+      goal_type: "ask",
+      value_type: "selection",
+      messages: "Just to lock it in—what's the single number I should go with?",
+      transitions: [
+        {
+          name: "check_expansion",
+          target: "workflow collaboration scope",
+          conditions: "user count < {number_of_users_to_qualify}",
+        },
+        {
+          name: "route",
+          target: "qualification routing",
+        },
+      ],
+    },
+    {
+      name: "workflow collaboration scope",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "Regarding the workflow—is this group working independently, or do they need to collaborate with other departments?",
+      transitions: [
+        {
+          name: "next",
+          target: "expansion planned",
+        },
+      ],
+    },
+    {
+      name: "expansion planned",
+      goal_type: "ask",
+      value_type: "approval",
+      messages:
+        "Are you expecting the rollout to expand beyond this initial group to other teams?",
+      transitions: [
+        {
+          name: "get_timeline",
+          target: "expansion timeline",
+          conditions: "expansion planned = yes",
+        },
+        {
+          name: "route",
+          target: "qualification routing",
+        },
+      ],
+    },
+    {
+      name: "expansion timeline",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "What's the timeline on that expansion—is it planned for the next 3 months, or is it further down the road?",
+      transitions: [
+        {
+          name: "get_total",
+          target: "total user count",
+          conditions:
+            "expansion timeline $date_valid and expansion timeline $date_diff_lte 93",
+        },
+        {
+          name: "route",
+          target: "qualification routing",
+        },
+      ],
+    },
+    {
+      name: "total user count",
+      goal_type: "ask",
+      value_type: "selection",
+      messages:
+        "So including that next wave, what is the total user count we should plan for?",
+      transitions: [
+        {
+          name: "next",
+          target: "qualification routing",
+        },
+      ],
+    },
+    // ---- Updated to SubagentGoal ----
+    {
+      name: "qualification routing",
+      is_subagent: true,
+      goal_type: "say_generative",
+      repeat: true,
+      messages:
+        "You have now collected the qualification data. Make the routing decision internally without explaining it to the user. INTERNAL MATH: TotalQualifiedUsers = user_count + confirmed 3-month expansion users. QUALIFIED if TotalQualifiedUsers >= {number_of_users_to_qualify} AND a workflow pain point was identified. UNQUALIFIED if TotalQualifiedUsers < {number_of_users_to_qualify} OR no clear need identified OR user refused to provide a number. Generate your decision.",
+      transitions: [
+        {
+          name: "transfer_enrichment",
+          prompt:
+            "Transfer the qualified prospect to the Enrichment stage after confirming both NEED and MATH.",
+          target: ["enrichment intro"],
+        },
+        {
+          name: "transfer_letdown",
+          prompt:
+            "Transfer unqualified prospects or those who refuse to answer key questions to the Soft Letdown subagent.",
+          target: ["soft_letdown"],
+        },
+      ],
+    },
+    {
+      name: "enrichment intro",
+      goal_type: "say",
+      appended: true,
+      messages:
+        "I'm going to ask a couple quick questions to make sure I connect you with the right product consultant.",
+      transitions: [
+        {
+          name: "next",
+          target: "has offshore employees",
+        },
+      ],
+    },
+    {
+      name: "has offshore employees",
+      goal_type: "ask",
+      value_type: "approval",
+      messages:
+        "So you mentioned your workflow needs — just so I have the right context, are you also using offshore employees?",
+      transitions: [
+        {
+          name: "next",
+          target: "industry",
+        },
+      ],
+    },
+    {
+      name: "industry",
+      goal_type: "ask",
+      value_type: "selection",
+      messages: "What industry or sector does your company operate in?",
+      transitions: [
+        {
+          name: "next",
+          target: "is public company",
+        },
+      ],
+    },
+    {
+      name: "is public company",
+      goal_type: "ask",
+      value_type: "approval",
+      messages: "Are you guys a public or private company?",
+      transitions: [],
+    },
+    // ---- Updated to SubagentGoal ----
+    {
+      name: "soft_letdown",
+      is_subagent: true,
+      goal_type: "say_generative",
+      repeat: true,
+      messages:
+        "Politely disengage unqualified prospects while maintaining a positive brand experience. Keep it short, sweet, and helpful without over-explaining the disqualification. For insufficient users (< {number_of_users_to_qualify}), recommend the free plan at monday.com. For no clear need, suggest browsing the resource center. For support/billing, state that a ticket has been raised and support will email them. Address everything the user said, drive the conversation to a natural conclusion, and always end with 'Thanks again, and have a great day!' Keep the entire interaction under 30 seconds.",
+      transitions: [],
+    },
+  ],
+};

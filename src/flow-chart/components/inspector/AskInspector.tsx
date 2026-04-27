@@ -2,11 +2,15 @@ import { QuestionMarkIcon } from "@phosphor-icons/react";
 import { useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
 
+import { toFieldName } from "../../adapters";
 import { fieldExits, type AskNode, type FlowEdge } from "../../flow-model";
 import { GoalNameInput } from "../GoalNameInput";
 import { ToggleGroup, type ToggleOption } from "../ToggleGroup";
 import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
-import { ComboboxSelect, type ComboboxSelectOption } from "../ui/ComboboxSelect";
+import {
+  ComboboxSelect,
+  type ComboboxSelectOption,
+} from "../ui/ComboboxSelect";
 import { EnumInput } from "../ui/EnumInput";
 import { Switch } from "../ui/Switch";
 
@@ -43,7 +47,10 @@ export function AskInspector({ id }: { id: string }) {
 
   return (
     <section className="space-y-3 p-3 text-sm">
-      <label htmlFor="ask-name" className="grid cursor-text grid-cols-[auto_1fr] items-center">
+      <label
+        htmlFor="ask-name"
+        className="grid cursor-text grid-cols-[auto_1fr] items-center"
+      >
         <QuestionMarkIcon className="size-6" weight="duotone" />
         <GoalNameInput id="ask-name" value={data.name} onChange={updateName} />
         <span className="col-start-2 px-2 text-xs text-slate-400">
@@ -63,23 +70,25 @@ export function AskInspector({ id }: { id: string }) {
         }
       />
 
-      <AutoResizeTextarea
-        name="ask-prompt"
-        value={prompt}
-        onChange={(event) => setPrompt(event.target.value)}
-        onBlur={(event) => {
-          const prompt = event.target.value;
-          setPrompt(prompt);
-          updateNodeData(id, { prompt });
-        }}
-        placeholder={
-          data.static
-            ? "Enter exact question for agent to ask"
-            : "e.g. Ask for the user's preferred option"
-        }
-        className="w-full resize-none overflow-hidden text-slate-900 outline-none"
-        spellCheck={true}
-      />
+      <label className="pb-10 cursor-text block">
+        <AutoResizeTextarea
+          name="ask-prompt"
+          value={prompt}
+          onChange={(event) => setPrompt(event.target.value)}
+          onBlur={(event) => {
+            const prompt = event.target.value;
+            setPrompt(prompt);
+            updateNodeData(id, { prompt });
+          }}
+          placeholder={
+            data.static
+              ? "Enter exact question for agent to ask"
+              : "e.g. Ask for the user's preferred option"
+          }
+          className="w-full resize-none overflow-hidden text-slate-900 outline-none"
+          spellCheck={true}
+        />
+      </label>
 
       <label className="space-y-1">
         <span className="text-slate-500 select-none">Answer type</span>
@@ -115,18 +124,11 @@ export function AskInspector({ id }: { id: string }) {
       <Switch
         label="Optional"
         value={data.field.optional ?? false}
-        onChange={(optional) => updateField({ ...data.field, optional: optional || undefined })}
+        onChange={(optional) =>
+          updateField({ ...data.field, optional: optional || undefined })
+        }
         className="-mx-2 px-2 font-medium"
       />
     </section>
   );
-}
-
-function toFieldName(label: string): string {
-  const slug = label
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9-_']+/g, "-")
-    .replace(/-+/g, "-");
-  return slug.replace(/^-+|-+$/g, "");
 }

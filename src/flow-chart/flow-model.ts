@@ -13,7 +13,7 @@ export type SayNodeData = {
 
 export type NodeExit = {
   name: string;
-  conditions?: string;
+  value?: string | boolean | null;
   acknowledge?: string;
 };
 
@@ -30,6 +30,15 @@ export type AskNodeData = {
   exits: NodeExit[];
 };
 
+export type SubagentNodeData = {
+  name: string;
+  prompt: string;
+  exits: {
+    name: string;
+    prompt: string;
+  }[];
+};
+
 export type ExitNodeData = {
   name: string;
 };
@@ -37,16 +46,11 @@ export type ExitNodeData = {
 export type GoalNode = Node<GoalNodeData, "goal">;
 export type SayNode = Node<SayNodeData, "say">;
 export type AskNode = Node<AskNodeData, "ask">;
+export type SubagentNode = Node<SubagentNodeData, "subagent">;
 export type ExitNode = Node<ExitNodeData, "exit">;
-export type FlowNode = GoalNode | SayNode | AskNode | ExitNode;
+export type FlowNode = GoalNode | SayNode | AskNode | SubagentNode | ExitNode;
 
-export type TransitionEdgeData = {
-  kind: "transition";
-  name: string;
-  conditions?: string;
-  prompt?: string;
-};
-export type FlowEdge = Edge<TransitionEdgeData>;
+export type FlowEdge = Edge;
 
 export type FlowModel = {
   nodes: FlowNode[];
@@ -64,9 +68,12 @@ export function generateTransitionEdgeId(): string {
 export function fieldExits(field: AskNodeData["field"]): NodeExit[] {
   const exits =
     field.type === "boolean"
-      ? [{ name: "Yes" }, { name: "No" }]
-      : (field.enum?.filter(Boolean).map((name) => ({ name })) ?? []);
-  return field.optional ? [...exits, { name: "Refused to answer" }] : exits;
+      ? [
+          { name: "Yes", value: true },
+          { name: "No", value: false },
+        ]
+      : (field.enum?.filter(Boolean).map((name) => ({ name, value: name })) ?? []);
+  return field.optional ? [...exits, { name: "Refused to answer", value: null }] : exits;
 }
 
 export function goalDisplayName(goalName: string): string {
