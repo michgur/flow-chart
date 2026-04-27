@@ -4,9 +4,11 @@ import * as dagre from "dagre";
 import type { FlowEdge, FlowNode } from "./flow-model";
 
 function nodeSize(node: FlowNode) {
+  const width = node.type === "exit" ? 16 : 220;
+  const height = node.type === "exit" ? 16 : 56;
   return {
-    width: node.measured?.width ?? 220,
-    height: node.measured?.height ?? 56,
+    width: node.measured?.width ?? width,
+    height: node.measured?.height ?? height,
   };
 }
 
@@ -20,7 +22,7 @@ export function layoutNodes(nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
   graph.setDefaultEdgeLabel(() => ({}));
   graph.setGraph({
     rankdir: "TB",
-    ranksep: 24,
+    ranksep: 64,
     nodesep: 32,
     marginx: 24,
     marginy: 24,

@@ -4,6 +4,7 @@ import { Position, useNodeId, useReactFlow } from "@xyflow/react";
 import type { RefObject } from "react";
 
 import {
+  fieldExits,
   generateTransitionEdgeId,
   type FlowEdge,
   type FlowNode,
@@ -52,10 +53,13 @@ export function AddNodeMenu({
           }
         : {
             x: handlePosition.x,
-            y: handlePosition.y + 120,
+            y: handlePosition.y + 64,
           };
-    sourceHandle?.x;
     const nextId = `${type}:${crypto.randomUUID()}`;
+    const field = {
+      name: "answer",
+      type: "boolean" as const,
+    };
     const nextNode: FlowNode =
       type === "say"
         ? {
@@ -77,10 +81,8 @@ export function AddNodeMenu({
               name: "Ask",
               static: true,
               prompt: "",
-              field: {
-                name: "answer",
-                type: "boolean",
-              },
+              field,
+              exits: fieldExits(field),
             },
             position,
             selected: true,

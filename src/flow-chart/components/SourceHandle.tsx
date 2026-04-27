@@ -11,11 +11,17 @@ type SourceHandleProps = {
   className?: string;
 };
 
-export function SourceHandle({ id, position = Position.Bottom, className }: SourceHandleProps) {
+export function SourceHandle({
+  id,
+  position = Position.Bottom,
+  className,
+}: SourceHandleProps) {
   const [open, setOpen] = useState(false);
   const handleRef = useRef<HTMLDivElement>(null);
   const connections = useNodeConnections(
-    id === undefined ? { handleType: "source" } : { handleType: "source", handleId: id },
+    id === undefined
+      ? { handleType: "source" }
+      : { handleType: "source", handleId: id },
   );
   const canAdd = connections.length === 0;
 
@@ -40,13 +46,22 @@ export function SourceHandle({ id, position = Position.Bottom, className }: Sour
           e.stopPropagation();
           setOpen(true);
         }}
-        onKeyDown={(e) => ["Enter", " ", "ArrowDown"].includes(e.key) && setOpen(true)}
+        onKeyDown={(e) =>
+          ["Enter", " ", "ArrowDown"].includes(e.key) && setOpen(true)
+        }
       >
-        {canAdd && <PlusIcon weight="bold" className="size-full text-slate-100" />}
+        {canAdd && (
+          <PlusIcon weight="bold" className="size-full text-slate-100" />
+        )}
       </Handle>
 
       {canAdd && (
-        <AddNodeMenu anchor={handleRef} open={open} onOpenChange={setOpen} sourceHandleId={id} />
+        <AddNodeMenu
+          anchor={handleRef}
+          open={open}
+          onOpenChange={setOpen}
+          sourceHandleId={id}
+        />
       )}
     </>
   );

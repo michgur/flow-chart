@@ -17,7 +17,9 @@ export function SayNode({ selected, data }: NodeProps<SayNode>) {
       <TargetHandle position={Position.Top} />
       <h4 className="flex items-center gap-1 text-slate-600">
         <QuotesIcon weight="duotone" className="size-4" />
-        <span className="text-base">{goalDisplayName(data.name)}</span>
+        <span className="text-base overflow-hidden text-ellipsis whitespace-nowrap">
+          {goalDisplayName(data.name)}
+        </span>
       </h4>
       {data.prompt && (
         <p

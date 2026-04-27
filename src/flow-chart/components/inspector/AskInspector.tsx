@@ -2,7 +2,7 @@ import { QuestionMarkIcon } from "@phosphor-icons/react";
 import { useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
 
-import { type AskNode, type FlowEdge } from "../../flow-model";
+import { fieldExits, type AskNode, type FlowEdge } from "../../flow-model";
 import { GoalNameInput } from "../GoalNameInput";
 import { ToggleGroup, type ToggleOption } from "../ToggleGroup";
 import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
@@ -31,8 +31,10 @@ export function AskInspector({ id }: { id: string }) {
 
   const mode: AskMode = data.static ? "script" : "prompt";
   const fieldName = toFieldName(data.name);
-  const updateField = (field: AskNode["data"]["field"]) =>
-    updateNodeData(id, { field: { ...field, name: fieldName } });
+  const updateField = (field: AskNode["data"]["field"]) => {
+    const next = { ...field, name: fieldName };
+    updateNodeData(id, { field: next, exits: fieldExits(next) });
+  };
   const updateName = (name: string) =>
     updateNodeData(id, {
       name,

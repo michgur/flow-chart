@@ -3,23 +3,10 @@ import { useState } from "react";
 
 import { FlowChart } from "./flow-chart";
 import type { Script } from "./flow-chart/data-model";
+import { flowModelToScript } from "./flow-chart/adapters";
+import sampleFlowModel from "./sample";
 
-const initialModel: Script = {
-  goals: [
-    {
-      name: "start",
-      nodeType: "say",
-    },
-    {
-      name: "collect-details",
-      nodeType: "say",
-    },
-    {
-      name: "done",
-      nodeType: "ask",
-    },
-  ],
-};
+const initialModel = flowModelToScript(sampleFlowModel);
 
 function App() {
   const [model, setModel] = useState<Script>(initialModel);

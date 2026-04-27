@@ -1,6 +1,7 @@
 import { layoutNodes } from "./auto-layout";
 import type { Goal, Script, Transition } from "./data-model";
 import {
+  fieldExits,
   generateTransitionEdgeId,
   type FlowEdge,
   type FlowModel,
@@ -35,18 +36,20 @@ export function scriptToFlowModel(script: Script): FlowModel {
       };
     }
     if (goal.nodeType === "ask") {
+      const field = {
+        name: goal.name,
+        type: "boolean" as const,
+      };
+
       return {
         id: goal.id,
         type: "ask",
         data: {
           name: goal.name,
           static: true,
-          waitForResponse: false,
           prompt: "",
-          field: {
-            name: goal.name,
-            type: "boolean",
-          },
+          field,
+          exits: fieldExits(field),
         },
         position: { x: 0, y: 0 },
       };
@@ -112,11 +115,7 @@ export function flowModelToScript(flow: FlowModel): Script {
   };
 }
 
-function transitionToEdge(
-  source: string,
-  target: string,
-  transition: Transition,
-): FlowEdge {
+function transitionToEdge(source: string, target: string, transition: Transition): FlowEdge {
   return {
     id: generateTransitionEdgeId(),
     source,
@@ -130,21 +129,4 @@ function transitionToEdge(
     },
     animated: true,
   };
-}
-
-function edgeToTransition(edge: FlowEdge, target: string): Transition {
-  const transition: Transition = {
-    name: edge.data?.name ?? "transition",
-    target,
-  };
-
-  if (edge.data?.conditions !== undefined) {
-    transition.conditions = edge.data.conditions;
-  }
-
-  if (edge.data?.prompt !== undefined) {
-    transition.prompt = edge.data.prompt;
-  }
-
-  return transition;
 }

@@ -9,15 +9,12 @@ import {
   applyNodeChanges,
   applyEdgeChanges,
 } from "@xyflow/react";
-import { useCallback, useReducer, useRef, useState } from "react";
+import { useCallback, useReducer, useRef } from "react";
 
 import { flowModelToScript, scriptToFlowModel } from "../adapters";
 import type { Script } from "../data-model";
-import {
-  generateTransitionEdgeId,
-  type FlowEdge,
-  type FlowNode,
-} from "../flow-model";
+import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
+import { syncExits } from "../sync-exits";
 
 type OnChange = (next: Script) => void;
 
@@ -42,18 +39,21 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
   if (ref.current === null || !scriptsEqual(ref.current.value, value)) {
     ref.current = {
       value,
-      ...scriptToFlowModel(value),
+      ...syncExits(scriptToFlowModel(value)),
     };
   }
 
   const [, forceUpdate] = useReducer((x) => !x, false);
   const update = useCallback(
     (emit = true) => {
-      if (emit && ref.current) {
-        const next = flowModelToScript(ref.current);
-        if (!scriptsEqual(next, ref.current.value)) {
-          ref.current.value = next;
-          onChange(next);
+      if (ref.current) {
+        Object.assign(ref.current, syncExits(ref.current));
+        if (emit) {
+          const next = flowModelToScript(ref.current);
+          if (!scriptsEqual(next, ref.current.value)) {
+            ref.current.value = next;
+            onChange(next);
+          }
         }
       }
       forceUpdate();

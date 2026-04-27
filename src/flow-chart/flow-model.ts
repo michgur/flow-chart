@@ -27,12 +27,18 @@ export type AskNodeData = {
     enum?: string[];
     optional?: boolean;
   };
+  exits: NodeExit[];
+};
+
+export type ExitNodeData = {
+  name: string;
 };
 
 export type GoalNode = Node<GoalNodeData, "goal">;
 export type SayNode = Node<SayNodeData, "say">;
 export type AskNode = Node<AskNodeData, "ask">;
-export type FlowNode = GoalNode | SayNode | AskNode;
+export type ExitNode = Node<ExitNodeData, "exit">;
+export type FlowNode = GoalNode | SayNode | AskNode | ExitNode;
 
 export type TransitionEdgeData = {
   kind: "transition";
@@ -53,6 +59,14 @@ export function generateGoalNodeId(): string {
 
 export function generateTransitionEdgeId(): string {
   return `edge:${crypto.randomUUID()}`;
+}
+
+export function fieldExits(field: AskNodeData["field"]): NodeExit[] {
+  const exits =
+    field.type === "boolean"
+      ? [{ name: "Yes" }, { name: "No" }]
+      : (field.enum?.filter(Boolean).map((name) => ({ name })) ?? []);
+  return field.optional ? [...exits, { name: "Refused to answer" }] : exits;
 }
 
 export function goalDisplayName(goalName: string): string {
