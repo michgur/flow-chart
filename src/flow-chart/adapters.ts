@@ -99,33 +99,24 @@ export function flowModelToScript(flow: FlowModel): Script {
     nameByGoalId.set(node.id, node.data.name);
   }
 
-  const goals = goalNodes.map<Goal>((node) => {
-    const seenTargets = new Set<string>();
-    const transitions = flow.edges.flatMap((edge) => {
-      if (edge.source !== node.id) return [];
-      if (seenTargets.has(edge.target)) return [];
-
-      const target = nameByGoalId.get(edge.target);
-      if (!target) return [];
-
-      seenTargets.add(edge.target);
-      return edgeToTransition(edge, target);
-    });
-
-    return {
+  const goals = flow.nodes
+    .filter((node) => node.type === "say" || node.type === "ask")
+    .map<Goal>((node) => ({
       name: node.data.name,
-      nodeType: "say",
-      messages: node.data.messages,
-      transitions,
-    };
-  });
+      nodeType: node.type,
+      messages: node.data.prompt,
+    }));
 
   return {
     goals,
   };
 }
 
-function transitionToEdge(source: string, target: string, transition: Transition): FlowEdge {
+function transitionToEdge(
+  source: string,
+  target: string,
+  transition: Transition,
+): FlowEdge {
   return {
     id: generateTransitionEdgeId(),
     source,

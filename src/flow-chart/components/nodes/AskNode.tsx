@@ -1,15 +1,33 @@
 import { QuestionMarkIcon } from "@phosphor-icons/react";
-import { Position, type NodeProps } from "@xyflow/react";
+import { Position, type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
+import { useEffect } from "react";
 
 import { cn } from "../../../lib/utils";
 import { goalDisplayName, type AskNode } from "../../flow-model";
 import { SourceHandle } from "../SourceHandle";
 import { TargetHandle } from "../TargetHandle";
 
-export function AskNode({ selected, data }: NodeProps<AskNode>) {
-  const fieldName = data.field.name || "answer";
-  const fieldType = data.field.type === "boolean" ? "Boolean" : "Choice";
-  const options = data.field.enum?.filter(Boolean).slice(0, 3) ?? [];
+export function AskNode({ id, selected, data }: NodeProps<AskNode>) {
+  const updateNodeInternals = useUpdateNodeInternals();
+  const fieldType = data.field.type === "boolean" ? "Yes / No" : "Choice";
+  const enumOptions = data.field.enum?.filter(Boolean) ?? [];
+  const answerExits =
+    data.field.type === "boolean"
+      ? [
+          { id: "true", label: "Yes" },
+          { id: "false", label: "No" },
+        ]
+      : enumOptions.length > 0
+        ? enumOptions.map((option) => ({ id: option, label: option }))
+        : [{ id: undefined, label: "Next" }];
+  const exits = data.field.optional
+    ? [...answerExits, { id: "refused", label: "Refused to answer" }]
+    : answerExits;
+
+  useEffect(
+    () => updateNodeInternals(id),
+    [data.field.enum, data.field.optional, data.field.type, id, updateNodeInternals],
+  );
 
   return (
     <div
@@ -33,26 +51,24 @@ export function AskNode({ selected, data }: NodeProps<AskNode>) {
           {data.prompt}
         </p>
       )}
-      <div className="flex items-center gap-2 text-xs text-blue-800">
-        <div className="size-3 rounded-xs bg-blue-800" />
+      <div className="text-xs text-slate-500">
         <span>
-          {fieldType}: {fieldName}
+          Answer type: {fieldType}
           {data.field.optional && " (optional)"}
         </span>
       </div>
-      {options.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {options.map((option) => (
-            <span
-              key={option}
-              className="max-w-full truncate rounded-xs bg-blue-100 px-1.5 py-0.5 text-blue-800"
-            >
-              {option}
-            </span>
-          ))}
-        </div>
-      )}
-      <SourceHandle position={Position.Bottom} />
+      <div className="-mx-3 mt-1 -mb-2 border-t border-slate-200 text-slate-600">
+        {exits.map((exit) => (
+          <div key={exit.id ?? "default"} className="relative flex min-h-7 items-center px-3 pr-7">
+            <span>{exit.label}</span>
+            <SourceHandle
+              id={exit.id}
+              position={Position.Right}
+              className="absolute! top-1/2! right-0!"
+            />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

@@ -3,8 +3,12 @@ import * as dagre from "dagre";
 
 import type { FlowEdge, FlowNode } from "./flow-model";
 
-const LAYOUT_NODE_WIDTH = 220;
-const LAYOUT_NODE_HEIGHT = 56;
+function nodeSize(node: FlowNode) {
+  return {
+    width: node.measured?.width ?? 220,
+    height: node.measured?.height ?? 56,
+  };
+}
 
 export function layoutNodes(nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
   if (nodes.length === 0) {
@@ -16,17 +20,14 @@ export function layoutNodes(nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
   graph.setDefaultEdgeLabel(() => ({}));
   graph.setGraph({
     rankdir: "TB",
-    ranksep: 96,
-    nodesep: 60,
+    ranksep: 24,
+    nodesep: 32,
     marginx: 24,
     marginy: 24,
   });
 
   for (const node of nodes) {
-    graph.setNode(node.id, {
-      width: LAYOUT_NODE_WIDTH,
-      height: LAYOUT_NODE_HEIGHT,
-    });
+    graph.setNode(node.id, nodeSize(node));
   }
 
   for (const edge of edges) {
@@ -42,13 +43,14 @@ export function layoutNodes(nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
       return node;
     }
 
+    const size = nodeSize(node);
     return {
       ...node,
       sourcePosition: Position.Bottom,
       targetPosition: Position.Top,
       position: {
-        x: layoutedNode.x - LAYOUT_NODE_WIDTH / 2,
-        y: layoutedNode.y - LAYOUT_NODE_HEIGHT / 2,
+        x: layoutedNode.x - size.width / 2,
+        y: layoutedNode.y - size.height / 2,
       },
     };
   });
