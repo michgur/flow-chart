@@ -13,7 +13,11 @@ import { useCallback, useReducer, useRef } from "react";
 
 import { flowModelToScript, scriptToFlowModel } from "../adapters";
 import type { Script } from "../data-model";
-import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
+import {
+  generateTransitionEdgeId,
+  type FlowEdge,
+  type FlowNode,
+} from "../flow-model";
 import { syncExits } from "../sync-exits";
 
 type OnChange = (next: Script) => void;
@@ -94,6 +98,7 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
           sourceHandle: connection.sourceHandle ?? null,
           target: connection.target,
           targetHandle: connection.targetHandle ?? null,
+          type: "smoothstep",
         },
       ];
       update();

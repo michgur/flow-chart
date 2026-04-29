@@ -10,12 +10,12 @@ export function SayNode({ selected, data }: NodeProps<SayNode>) {
   return (
     <div
       className={cn(
-        "flex w-64 flex-col gap-2 rounded-sm border border-slate-300 bg-slate-50 px-3 py-2 text-xs shadow-xs hover:bg-slate-100 active:scale-99",
+        "flex w-64 flex-col gap-2 rounded-sm border border-violet-200 bg-violet-50 px-3 py-2 text-xs shadow-xs hover:bg-violet-100 active:scale-99",
         selected && "border-emerald-500 shadow-emerald-950/5",
       )}
     >
       <TargetHandle position={Position.Top} />
-      <h4 className="flex items-center gap-1 text-slate-600">
+      <h4 className="flex items-center gap-1 text-violet-700">
         <QuotesIcon weight="duotone" className="size-4" />
         <span className="text-base overflow-hidden text-ellipsis whitespace-nowrap">
           {goalDisplayName(data.name)}
@@ -24,18 +24,17 @@ export function SayNode({ selected, data }: NodeProps<SayNode>) {
       {data.prompt && (
         <p
           className={cn(
-            "line-clamp-3 overflow-hidden text-ellipsis text-slate-400",
-            data.static && "border-s-2 border-slate-200 ps-2",
+            "line-clamp-3 overflow-hidden text-ellipsis text-violet-700/70",
+            data.static && "border-s-2 border-violet-200 ps-2",
           )}
         >
           {data.prompt}
         </p>
       )}
       {data.waitForResponse && (
-        <div className="flex items-center gap-2 text-xs text-blue-800">
-          <div className="size-3 rounded-xs bg-blue-800"></div>
-          <span>Wait for user response</span>
-        </div>
+        <span className="flex items-center gap-2 text-xs text-violet-800">
+          Then wait for user response
+        </span>
       )}
       <SourceHandle position={Position.Bottom} />
     </div>

@@ -50,7 +50,8 @@ export type SubagentNode = Node<SubagentNodeData, "subagent">;
 export type ExitNode = Node<ExitNodeData, "exit">;
 export type FlowNode = GoalNode | SayNode | AskNode | SubagentNode | ExitNode;
 
-export type FlowEdge = Edge;
+export type FlowEdgeType = "default" | "bezier";
+export type FlowEdge = Edge<Record<string, unknown>, FlowEdgeType>;
 
 export type FlowModel = {
   nodes: FlowNode[];
@@ -72,8 +73,11 @@ export function fieldExits(field: AskNodeData["field"]): NodeExit[] {
           { name: "Yes", value: true },
           { name: "No", value: false },
         ]
-      : (field.enum?.filter(Boolean).map((name) => ({ name, value: name })) ?? []);
-  return field.optional ? [...exits, { name: "Refused to answer", value: null }] : exits;
+      : (field.enum?.filter(Boolean).map((name) => ({ name, value: name })) ??
+        []);
+  return field.optional
+    ? [...exits, { name: "Refused to answer", value: null }]
+    : exits;
 }
 
 export function goalDisplayName(goalName: string): string {

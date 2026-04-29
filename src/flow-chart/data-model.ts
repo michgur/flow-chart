@@ -2,7 +2,7 @@ export type GoalName = string;
 export type ConditionDSL = string;
 
 export type AskTransition = {
-  name: string;
+  name?: string;
   target?: GoalName;
   conditions?: ConditionDSL;
   refusal_handler?: true;
@@ -10,7 +10,7 @@ export type AskTransition = {
 };
 
 export type SayTransition = {
-  name: string;
+  name?: undefined;
   target: GoalName;
   acknowledge?: string;
 };
@@ -43,7 +43,7 @@ export type SubagentGoal = {
   transitions: {
     name: string;
     prompt: string;
-    target?: GoalName[];
+    target?: GoalName;
   }[];
 };
 

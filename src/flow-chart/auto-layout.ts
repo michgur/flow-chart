@@ -1,11 +1,10 @@
-import { Position } from "@xyflow/react";
 import * as dagre from "dagre";
 
 import type { FlowEdge, FlowNode } from "./flow-model";
 
 function nodeSize(node: FlowNode) {
-  const width = node.type === "exit" ? 16 : 220;
-  const height = node.type === "exit" ? 16 : 56;
+  const width = node.type === "exit" ? 16 : 256;
+  const height = node.type === "exit" ? 16 : 128;
   return {
     width: node.measured?.width ?? width,
     height: node.measured?.height ?? height,
@@ -13,46 +12,44 @@ function nodeSize(node: FlowNode) {
 }
 
 export function layoutNodes(nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
-  if (nodes.length === 0) {
-    return nodes;
-  }
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-  const graph = new dagre.graphlib.Graph();
-
-  graph.setDefaultEdgeLabel(() => ({}));
-  graph.setGraph({
-    rankdir: "TB",
-    ranksep: 64,
-    nodesep: 32,
-    marginx: 24,
-    marginy: 24,
+  // Configure the layout for a top-to-bottom, grid-like structure
+  dagreGraph.setGraph({
+    rankdir: "TB", // Top to Bottom layout
+    align: "UL", // Up-Left alignment enforces a strict, blocky grid feel
+    nodesep: 128, // Minimum horizontal spacing between nodes
+    ranksep: 64, // Minimum vertical spacing between ranks (layers)
   });
 
-  for (const node of nodes) {
-    graph.setNode(node.id, nodeSize(node));
-  }
+  // 1. Feed nodes into Dagre
+  nodes.forEach((node) => {
+    const { width, height } = nodeSize(node);
+    // Dagre needs the dimensions to accurately space the grid
+    dagreGraph.setNode(node.id, { width, height });
+  });
 
-  for (const edge of edges) {
-    graph.setEdge(edge.source, edge.target);
-  }
+  // 2. Feed edges into Dagre
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
 
-  dagre.layout(graph);
+  // 3. Execute the layout math
+  dagre.layout(dagreGraph);
 
+  // 4. Map the calculated positions back to the React Flow nodes
   return nodes.map((node) => {
-    const layoutedNode = graph.node(node.id);
+    const dagreNode = dagreGraph.node(node.id);
+    const { width, height } = nodeSize(node);
 
-    if (!layoutedNode) {
-      return node;
-    }
-
-    const size = nodeSize(node);
     return {
       ...node,
-      sourcePosition: Position.Bottom,
-      targetPosition: Position.Top,
       position: {
-        x: layoutedNode.x - size.width / 2,
-        y: layoutedNode.y - size.height / 2,
+        // Dagre's x and y represent the CENTER of the node.
+        // React Flow expects x and y to represent the TOP-LEFT corner.
+        x: dagreNode.x - width / 2,
+        y: dagreNode.y - height / 2,
       },
     };
   });

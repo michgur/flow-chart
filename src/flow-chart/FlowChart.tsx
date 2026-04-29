@@ -1,8 +1,11 @@
 import {
   Background,
   BackgroundVariant,
+  BezierEdge,
   Controls,
   ReactFlow,
+  SmoothStepEdge,
+  type EdgeComponentProps,
   type ReactFlowInstance,
 } from "@xyflow/react";
 import { type Dispatch, type SetStateAction } from "react";
@@ -16,7 +19,7 @@ import { ExitNode } from "./components/nodes/ExitNode";
 import { SayNode } from "./components/nodes/SayNode";
 import { SubagentNode } from "./components/nodes/SubagentNode";
 import type { Script } from "./data-model";
-import { type FlowEdge, type FlowNode } from "./flow-model";
+import { type FlowEdge, type FlowEdgeType, type FlowNode } from "./flow-model";
 import { useScriptFlow } from "./hooks/use-script-flow";
 
 export type FlowChartProps = {
@@ -35,9 +38,21 @@ const nodeTypes = {
   exit: ExitNode,
 };
 
+const edgeTypes: Record<FlowEdgeType, React.FC<EdgeComponentProps>> = {
+  default: SmoothStepEdge,
+  bezier: BezierEdge,
+};
+
 export function FlowChart({ model, onChange, className }: FlowChartProps) {
-  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onReconnect, isValidConnection } =
-    useScriptFlow(model, onChange);
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    onReconnect,
+    isValidConnection,
+  } = useScriptFlow(model, onChange);
 
   return (
     <ReactFlow<FlowNode, FlowEdge>
@@ -45,12 +60,17 @@ export function FlowChart({ model, onChange, className }: FlowChartProps) {
       nodes={nodes}
       edges={edges}
       nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
       onReconnect={onReconnect}
       isValidConnection={isValidConnection}
-      defaultEdgeOptions={{ animated: true }}
+      defaultEdgeOptions={{
+        animated: false,
+        type: "default",
+        className: "[&_path]:opacity-50",
+      }}
       proOptions={{ hideAttribution: true }}
       fitView
     >

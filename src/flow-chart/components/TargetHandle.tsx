@@ -9,7 +9,7 @@ export function TargetHandle({ position }: TargetHandleProps) {
 
   return (
     <>
-      <Handle type="target" position={position} className="h-0! min-h-0! border-none!" />
+      <Handle type="target" position={position} isConnectable={false} />
 
       {connection.inProgress && (
         <Handle

@@ -9,7 +9,6 @@ export const sampleScript: Script = {
         "I saw you reached out regarding {description/improving your workflows} — how are you doing today?",
       transitions: [
         {
-          name: "next",
           target: "main need",
         },
       ],
@@ -22,7 +21,6 @@ export const sampleScript: Script = {
         "The goal for today is just to clarify a few details so I can connect you to the right product consultant. By the way, this call is recorded. Start by asking the user, in their own words, what was the main trigger that brought them to monday. Continue inquiring to understand their main business objective, level of urgency, and maturity of their process.",
       transitions: [
         {
-          name: "next",
           target: "product type",
         },
       ],
@@ -41,7 +39,6 @@ export const sampleScript: Script = {
       ],
       transitions: [
         {
-          name: "next",
           target: "prospect type",
         },
       ],
@@ -55,7 +52,6 @@ export const sampleScript: Script = {
       choices: [{ name: "Explorer" }, { name: "Sprinter" }],
       transitions: [
         {
-          name: "next",
           target: "workflow pain point",
         },
       ],
@@ -68,7 +64,6 @@ export const sampleScript: Script = {
         "What’s the specific breaking point in your current process that you're hoping to address with monday?",
       transitions: [
         {
-          name: "next",
           target: "current tools",
         },
       ],
@@ -98,7 +93,6 @@ export const sampleScript: Script = {
       messages: "What's missing or not working with that setup today?",
       transitions: [
         {
-          name: "next",
           target: "user count",
         },
       ],
@@ -150,7 +144,6 @@ export const sampleScript: Script = {
         "Regarding the workflow—is this group working independently, or do they need to collaborate with other departments?",
       transitions: [
         {
-          name: "next",
           target: "expansion planned",
         },
       ],
@@ -200,7 +193,6 @@ export const sampleScript: Script = {
         "So including that next wave, what is the total user count we should plan for?",
       transitions: [
         {
-          name: "next",
           target: "qualification routing",
         },
       ],
@@ -218,13 +210,13 @@ export const sampleScript: Script = {
           name: "transfer_enrichment",
           prompt:
             "Transfer the qualified prospect to the Enrichment stage after confirming both NEED and MATH.",
-          target: ["enrichment intro"],
+          target: "enrichment intro",
         },
         {
           name: "transfer_letdown",
           prompt:
             "Transfer unqualified prospects or those who refuse to answer key questions to the Soft Letdown subagent.",
-          target: ["soft_letdown"],
+          target: "soft_letdown",
         },
       ],
     },
@@ -236,7 +228,6 @@ export const sampleScript: Script = {
         "I'm going to ask a couple quick questions to make sure I connect you with the right product consultant.",
       transitions: [
         {
-          name: "next",
           target: "has offshore employees",
         },
       ],
@@ -249,7 +240,6 @@ export const sampleScript: Script = {
         "So you mentioned your workflow needs — just so I have the right context, are you also using offshore employees?",
       transitions: [
         {
-          name: "next",
           target: "industry",
         },
       ],
@@ -261,7 +251,6 @@ export const sampleScript: Script = {
       messages: "What industry or sector does your company operate in?",
       transitions: [
         {
-          name: "next",
           target: "is public company",
         },
       ],
