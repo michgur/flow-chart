@@ -2,7 +2,7 @@ import { Combobox } from "@base-ui/react/combobox";
 import { CaretDownIcon, CheckIcon } from "@phosphor-icons/react";
 import { useEffect, useState } from "react";
 
-import { cn } from "../../../lib/utils";
+import { cn } from "../../lib/utils";
 
 export type ComboboxSelectOption<Value extends string> = {
   value: Value;
@@ -10,7 +10,7 @@ export type ComboboxSelectOption<Value extends string> = {
 };
 
 type ComboboxSelectProps<Value extends string> = {
-  value: Value;
+  value: Value | null;
   onChange: (value: Value) => void;
   options: readonly ComboboxSelectOption<Value>[];
   placeholder?: string;
@@ -77,11 +77,7 @@ export function ComboboxSelect<Value extends string>({
       </Combobox.InputGroup>
 
       <Combobox.Portal>
-        <Combobox.Positioner
-          className="z-50 outline-none"
-          align="start"
-          sideOffset={4}
-        >
+        <Combobox.Positioner className="z-50 outline-none" align="start" sideOffset={4}>
           <Combobox.Popup className="nodrag nopan transition-transform,scale,opacity w-(--anchor-width) origin-(--transform-origin) overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-sm outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             <Combobox.Empty>
               <div className="px-3 py-2 text-slate-400">No options found</div>

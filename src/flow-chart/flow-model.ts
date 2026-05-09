@@ -13,7 +13,9 @@ export type SayNodeData = {
 
 export type NodeExit = {
   name: string;
+  /** @deprecated */
   value?: string | boolean | null;
+  conditions?: string;
   acknowledge?: string;
 };
 
@@ -23,9 +25,10 @@ export type AskNodeData = {
   prompt: string;
   field: {
     name: string;
-    type: "boolean" | "enum";
+    type: "boolean" | "enum" | "string" | "number";
     enum?: string[];
     optional?: boolean;
+    description?: string;
   };
   exits: NodeExit[];
 };

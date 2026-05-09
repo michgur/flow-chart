@@ -3,12 +3,7 @@ import { QuestionMarkIcon, QuotesIcon, RobotIcon } from "@phosphor-icons/react";
 import { Position, useNodeId, useReactFlow } from "@xyflow/react";
 import type { RefObject } from "react";
 
-import {
-  fieldExits,
-  generateTransitionEdgeId,
-  type FlowEdge,
-  type FlowNode,
-} from "../flow-model";
+import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
 
 type AddNodeType = "say" | "ask" | "subagent";
 
@@ -25,12 +20,7 @@ const options = [
   { type: "subagent", label: "Subagent", Icon: RobotIcon },
 ] satisfies { type: AddNodeType; label: string; Icon: typeof QuotesIcon }[];
 
-export function AddNodeMenu({
-  anchor,
-  open,
-  onOpenChange,
-  sourceHandleId,
-}: AddNodeMenuProps) {
+export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddNodeMenuProps) {
   const nodeId = useNodeId();
   const { getNode, setEdges, setNodes } = useReactFlow<FlowNode, FlowEdge>();
 
@@ -40,9 +30,7 @@ export function AddNodeMenu({
     const source = getNode(nodeId);
     if (!source) return;
 
-    const sourceHandle = source.handles?.find(
-      (h) => (h.id ?? null) === (sourceHandleId ?? null),
-    );
+    const sourceHandle = source.handles?.find((h) => (h.id ?? null) === (sourceHandleId ?? null));
     const handlePosition = sourceHandle
       ? { x: sourceHandle.x, y: sourceHandle.y }
       : source.position;
@@ -84,7 +72,7 @@ export function AddNodeMenu({
                 static: true,
                 prompt: "",
                 field,
-                exits: fieldExits(field),
+                exits: [{ name: "", conditions: "" }],
               },
               position,
               selected: true,
@@ -101,17 +89,14 @@ export function AddNodeMenu({
               selected: true,
             };
 
-    setNodes((nodes) => [
-      ...nodes.map((node) => ({ ...node, selected: false })),
-      nextNode,
-    ]);
+    setNodes((nodes) => [...nodes.map((node) => ({ ...node, selected: false })), nextNode]);
 
     setEdges((edges) => [
       ...edges,
       {
         id: generateTransitionEdgeId(),
         source: nodeId,
-        sourceHandle: sourceHandleId ?? null,
+        sourceHandle: sourceHandleId,
         target: nextId,
       },
     ]);
@@ -120,11 +105,7 @@ export function AddNodeMenu({
   return (
     <Menu.Root open={open} onOpenChange={onOpenChange}>
       <Menu.Portal>
-        <Menu.Positioner
-          anchor={anchor}
-          sideOffset={8}
-          className="outline-none"
-        >
+        <Menu.Positioner anchor={anchor} sideOffset={8} className="outline-none">
           <Menu.Popup className="nodrag nopan transition-transform,scale,opacity z-50 min-w-32 origin-(--transform-origin) rounded-md bg-slate-50 p-1 text-sm text-slate-700 shadow-sm outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
             {options.map(({ type, label, Icon }) => (
               <Menu.Item

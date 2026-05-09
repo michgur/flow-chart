@@ -1,30 +1,15 @@
 import { RobotIcon } from "@phosphor-icons/react";
-import {
-  Handle,
-  Position,
-  type NodeProps,
-  useUpdateNodeInternals,
-} from "@xyflow/react";
+import { Handle, Position, type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
 import { useEffect } from "react";
 
-import { cn } from "../../../lib/utils";
-import {
-  goalDisplayName,
-  type SubagentNode as SubagentNodeType,
-} from "../../flow-model";
+import { goalDisplayName, type SubagentNode as SubagentNodeType } from "../../flow-model";
+import { cn } from "../../lib/utils";
 import { TargetHandle } from "../TargetHandle";
 
-export function SubagentNode({
-  id,
-  selected,
-  data,
-}: NodeProps<SubagentNodeType>) {
+export function SubagentNode({ id, selected, data }: NodeProps<SubagentNodeType>) {
   const updateNodeInternals = useUpdateNodeInternals();
 
-  useEffect(
-    () => updateNodeInternals(id),
-    [data.exits, id, updateNodeInternals],
-  );
+  useEffect(() => updateNodeInternals(id), [data.exits, id, updateNodeInternals]);
 
   return (
     <div

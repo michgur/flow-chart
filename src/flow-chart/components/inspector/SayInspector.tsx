@@ -3,10 +3,10 @@ import { useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
 
 import { type FlowEdge, type SayNode } from "../../flow-model";
-import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
 import { GoalNameInput } from "../GoalNameInput";
+import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
 import { Switch } from "../ui/Switch";
-import { ToggleGroup, type ToggleOption } from "../ToggleGroup";
+import { ToggleGroup, type ToggleOption } from "../ui/ToggleGroup";
 
 type SayMode = "script" | "prompt";
 
@@ -53,11 +53,7 @@ export function SayInspector({ id }: { id: string }) {
           setPrompt(prompt);
           updateNodeData(id, { prompt });
         }}
-        placeholder={
-          data.static
-            ? "Enter exact message for agent to say"
-            : "e.g. Greet the user"
-        }
+        placeholder={data.static ? "Enter exact message for agent to say" : "e.g. Greet the user"}
         className="w-full resize-none overflow-hidden text-slate-900 outline-none"
         spellCheck={true}
       />

@@ -1,8 +1,8 @@
 import { QuotesIcon } from "@phosphor-icons/react";
 import { Position, type NodeProps } from "@xyflow/react";
 
-import { cn } from "../../../lib/utils";
 import { goalDisplayName, type SayNode } from "../../flow-model";
+import { cn } from "../../lib/utils";
 import { SourceHandle } from "../SourceHandle";
 import { TargetHandle } from "../TargetHandle";
 
@@ -17,7 +17,7 @@ export function SayNode({ selected, data }: NodeProps<SayNode>) {
       <TargetHandle position={Position.Top} />
       <h4 className="flex items-center gap-1 text-violet-700">
         <QuotesIcon weight="duotone" className="size-4" />
-        <span className="text-base overflow-hidden text-ellipsis whitespace-nowrap">
+        <span className="overflow-hidden text-base text-ellipsis whitespace-nowrap">
           {goalDisplayName(data.name)}
         </span>
       </h4>

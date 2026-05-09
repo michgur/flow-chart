@@ -1,6 +1,6 @@
 import type { InputHTMLAttributes } from "react";
 
-import { cn } from "../../lib/utils";
+import { cn } from "../lib/utils";
 
 type GoalNameInputProps = {
   value: string;
@@ -15,7 +15,7 @@ export function GoalNameInput({ value, onChange, className, ...props }: GoalName
       autoFocus={value.length === 0}
       onChange={(event) => onChange(event.target.value)}
       onBlur={(event) => onChange(sanitizeGoalName(event.currentTarget.value))}
-      pattern="^[A-Za-z0-9 _'-]*$"
+      pattern="^[A-Za-z0-9 _'\-]*$"
       placeholder="goal-name"
       spellCheck={false}
       className={cn(

@@ -1,7 +1,7 @@
 import { Position, type NodeProps } from "@xyflow/react";
 
-import { cn } from "../../lib/utils";
 import { goalDisplayName, type GoalNode } from "../flow-model";
+import { cn } from "../lib/utils";
 import { SourceHandle } from "./SourceHandle";
 import { TargetHandle } from "./TargetHandle";
 

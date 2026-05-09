@@ -44,15 +44,8 @@ const edgeTypes: Record<FlowEdgeType, React.FC<EdgeComponentProps>> = {
 };
 
 export function FlowChart({ model, onChange, className }: FlowChartProps) {
-  const {
-    nodes,
-    edges,
-    onNodesChange,
-    onEdgesChange,
-    onConnect,
-    onReconnect,
-    isValidConnection,
-  } = useScriptFlow(model, onChange);
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect, onReconnect, isValidConnection } =
+    useScriptFlow(model, onChange);
 
   return (
     <ReactFlow<FlowNode, FlowEdge>
@@ -72,6 +65,7 @@ export function FlowChart({ model, onChange, className }: FlowChartProps) {
         className: "[&_path]:opacity-50",
       }}
       proOptions={{ hideAttribution: true }}
+      minZoom={0.3}
       fitView
     >
       <Background variant={BackgroundVariant.Dots} />

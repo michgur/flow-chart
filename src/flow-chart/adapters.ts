@@ -11,9 +11,55 @@ import {
   type AskNodeData,
   type FlowModel,
   type FlowNode,
-  type NodeExit,
 } from "./flow-model";
+import { invert } from "./lib/utils";
 import { syncExits } from "./sync-exits";
+
+const goalValueTypes: Record<
+  AskNodeData["field"]["type"],
+  AskGoal["value_type"]
+> = {
+  boolean: "approval",
+  enum: "selection",
+  string: "custom",
+  number: "number",
+};
+
+const fieldTypes = invert(goalValueTypes);
+
+function sanitizeSay(raw: Record<string, unknown>): SayGoal {
+  return { ...raw, transitions: raw.transitions ?? [] } as SayGoal;
+}
+
+function sanitizeAsk(raw: Record<string, unknown>): AskGoal {
+  return { ...raw, transitions: raw.transitions ?? [] } as AskGoal;
+}
+
+function sanitizeSubagent(raw: Record<string, unknown>): SubagentGoal {
+  return {
+    ...raw,
+    transitions: raw.transitions ?? [],
+  } as SubagentGoal;
+}
+
+function sanitizeGoal(raw: Record<string, unknown>): Goal {
+  const goalType = typeof raw.goal_type === "string" ? raw.goal_type : "ask";
+  if (goalType === "say_generative" && raw.repeat) return sanitizeSubagent(raw);
+  else if (["ask", "ask_generative"].includes(goalType))
+    return sanitizeAsk(raw);
+  return sanitizeSay(raw);
+}
+
+export function sanitizeScript(raw: unknown): Script {
+  if (typeof raw !== "object") return { goals: [] };
+  const obj = raw as Record<string, unknown>;
+
+  const goals = (Array.isArray(obj.goals) ? obj.goals : [])
+    .filter((g: unknown): g is Record<string, unknown> => typeof g === "object")
+    .map(sanitizeGoal);
+
+  return { goals };
+}
 
 export function scriptToFlowModel(script: Script): FlowModel {
   const goals = script.goals.map((goal, index) => ({
@@ -75,9 +121,7 @@ export function scriptToFlowModel(script: Script): FlowModel {
         field: askField(goal),
         exits: goal.transitions.map((transition) => ({
           name: transition.name ?? "",
-          value: transition.refusal_handler
-            ? null
-            : exitValue(goal, transition.conditions),
+          conditions: transition.conditions,
           acknowledge: transition.acknowledge,
         })),
       },
@@ -141,7 +185,6 @@ export function flowModelToScript(flow: FlowModel): Script {
       if (node.type === "subagent") {
         return {
           name: toFieldName(node.data.name),
-          is_subagent: true,
           goal_type: "say_generative",
           messages: node.data.prompt || undefined,
           repeat: true,
@@ -159,8 +202,8 @@ export function flowModelToScript(flow: FlowModel): Script {
       return {
         ...goal,
         goal_type: node.data.static ? "ask" : "ask_generative",
-        value_type:
-          node.data.field.type === "boolean" ? "approval" : "selection",
+        value_type: goalValueTypes[node.data.field.type] ?? "custom",
+        validation_prompt: node.data.field.description,
         choices:
           node.data.field.type === "enum"
             ? node.data.field.enum?.filter(Boolean).map((name) => ({ name }))
@@ -168,10 +211,7 @@ export function flowModelToScript(flow: FlowModel): Script {
         transitions: node.data.exits.map((exit) => ({
           name: exit.name,
           target: targetFor(node.id, exit.name) || undefined,
-          conditions: conditionValue(exit.value),
-          refusal_handler: (exit.value === null ? true : undefined) as
-            | true
-            | undefined,
+          conditions: exit.conditions,
           acknowledge: exit.acknowledge,
         })),
       };
@@ -196,7 +236,7 @@ function isSayGoal(goal: Goal): goal is SayGoal {
 }
 
 function isSubagentGoal(goal: Goal): goal is SubagentGoal {
-  return "is_subagent" in goal;
+  return goal.goal_type === "say_generative" && "repeat" in goal && goal.repeat;
 }
 
 function firstMessage(messages: string | string[] | undefined): string {
@@ -206,7 +246,7 @@ function firstMessage(messages: string | string[] | undefined): string {
 function askField(goal: AskGoal): AskNodeData["field"] {
   return {
     name: goal.name,
-    type: goal.value_type === "approval" ? "boolean" : "enum",
+    type: fieldTypes[goal.value_type ?? "custom"],
     enum:
       goal.value_type === "selection"
         ? goal.choices?.map((choice) => choice.name)
@@ -214,24 +254,6 @@ function askField(goal: AskGoal): AskNodeData["field"] {
     optional:
       goal.transitions.some((transition) => transition.refusal_handler) ||
       undefined,
+    description: goal.validation_prompt,
   };
-}
-
-function exitValue(
-  goal: AskGoal,
-  conditions: string | undefined,
-): NodeExit["value"] {
-  if (conditions === undefined) return undefined;
-  if (goal.value_type === "approval") {
-    return conditions === "yes"
-      ? true
-      : conditions === "no"
-        ? false
-        : conditions;
-  }
-  return conditions;
-}
-
-function conditionValue(value: NodeExit["value"]): string | undefined {
-  return value === true ? "yes" : value === false ? "no" : (value ?? undefined);
 }

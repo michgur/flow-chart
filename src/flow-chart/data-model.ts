@@ -20,7 +20,8 @@ export type AskGoal = {
   display_name?: string;
   goal_type: "ask" | "ask_generative"; // static = goal_type === 'ask'
   messages?: string | string[]; // array = take first item
-  value_type: "approval" | "selection"; // approval = boolean, selection = enum
+  value_type: "approval" | "selection" | "custom" | "number"; // approval = boolean, selection = enum, custom = string
+  validation_prompt?: string;
   choices?: { name: string }[]; // for selection
   transitions: AskTransition[];
 };
@@ -36,7 +37,6 @@ export type SayGoal = {
 
 export type SubagentGoal = {
   name: GoalName;
-  is_subagent: true;
   goal_type: "say_generative";
   messages?: string | string[];
   repeat: true;

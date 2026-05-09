@@ -5,7 +5,7 @@ import { SourceHandle } from "../SourceHandle";
 
 export function ExitNode({ data }: NodeProps<ExitNodeType>) {
   return (
-    <div title={data.name} className="relative w-4 h-1">
+    <div title={data.name} className="relative h-1 w-4">
       <Handle
         type="target"
         position={Position.Top}
