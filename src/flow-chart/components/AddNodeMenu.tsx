@@ -1,11 +1,17 @@
 import { Menu } from "@base-ui/react/menu";
-import { PhonePlusIcon, QuestionMarkIcon, QuotesIcon, RobotIcon } from "@phosphor-icons/react";
+import {
+  PhoneDisconnectIcon,
+  PhonePlusIcon,
+  QuestionMarkIcon,
+  QuotesIcon,
+  RobotIcon,
+} from "@phosphor-icons/react";
 import { Position, useNodeId, useReactFlow } from "@xyflow/react";
 import type { RefObject } from "react";
 
 import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
 
-type AddNodeType = "say" | "ask" | "subagent" | "newcall";
+type AddNodeType = "say" | "ask" | "subagent" | "newcall" | "hangup";
 
 type AddNodeMenuProps = {
   anchor: RefObject<HTMLDivElement | null>;
@@ -19,6 +25,7 @@ const options = [
   { type: "ask", label: "Ask", Icon: QuestionMarkIcon },
   { type: "subagent", label: "Subagent", Icon: RobotIcon },
   { type: "newcall", label: "Add Call", Icon: PhonePlusIcon },
+  { type: "hangup", label: "Hang Up", Icon: PhoneDisconnectIcon },
 ] satisfies { type: AddNodeType; label: string; Icon: typeof QuotesIcon }[];
 
 export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddNodeMenuProps) {
@@ -50,63 +57,77 @@ export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddN
       name: "answer",
       type: "boolean" as const,
     };
-    const nextNode: FlowNode =
-      type === "say"
-        ? {
-            id: nextId,
-            type: "say",
-            data: {
-              name: "Say",
-              static: true,
-              prompt: "",
-              waitForResponse: false,
-            },
-            position,
-            selected: true,
-          }
-        : type === "ask"
-          ? {
-              id: nextId,
-              type: "ask",
-              data: {
-                name: "Ask",
-                static: true,
-                prompt: "",
-                field,
-                exits: [{ name: "", conditions: "" }],
-              },
-              position,
-              selected: true,
-            }
-          : type === "subagent"
-            ? {
-                id: nextId,
-                type: "subagent",
-                data: {
-                  name: "Subagent",
-                  prompt: "",
-                  exits: [{ name: "Done", prompt: "" }],
-                },
-                position,
-                selected: true,
-              }
-            : {
-                id: nextId,
-                type: "newcall",
-                data: {
-                  name: "Add Call",
-                  static: true,
-                  prompt: "",
-                  agent: "",
-                  phoneNumber: "",
-                  preMergeMessage: undefined,
-                  parentFailMessage: undefined,
-                  brief: undefined,
-                  idleMessages: [],
-                },
-                position,
-                selected: true,
-              };
+    let nextNode: FlowNode;
+    if (type === "say") {
+      nextNode = {
+        id: nextId,
+        type: "say",
+        data: {
+          name: "Say",
+          static: true,
+          prompt: "",
+          waitForResponse: false,
+        },
+        position,
+        selected: true,
+      };
+    } else if (type === "ask") {
+      nextNode = {
+        id: nextId,
+        type: "ask",
+        data: {
+          name: "Ask",
+          static: true,
+          prompt: "",
+          field,
+          exits: [{ name: "", conditions: "" }],
+        },
+        position,
+        selected: true,
+      };
+    } else if (type === "subagent") {
+      nextNode = {
+        id: nextId,
+        type: "subagent",
+        data: {
+          name: "Subagent",
+          prompt: "",
+          exits: [{ name: "Done", prompt: "" }],
+        },
+        position,
+        selected: true,
+      };
+    } else if (type === "newcall") {
+      nextNode = {
+        id: nextId,
+        type: "newcall",
+        data: {
+          name: "Add Call",
+          static: true,
+          prompt: "",
+          agent: "",
+          phoneNumber: "",
+          preMergeMessage: undefined,
+          parentFailMessage: undefined,
+          brief: undefined,
+          idleMessages: [],
+        },
+        position,
+        selected: true,
+      };
+    } else {
+      nextNode = {
+        id: nextId,
+        type: "hangup",
+        data: {
+          name: "Hang Up",
+          prompt: "",
+          callResult: undefined,
+        },
+        position,
+        selected: true,
+      };
+    }
 
     setNodes((nodes) => [...nodes.map((node) => ({ ...node, selected: false })), nextNode]);
 

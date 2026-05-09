@@ -2,6 +2,7 @@ import { layoutNodes } from "./auto-layout";
 import type {
   AskGoal,
   Goal,
+  HangupGoal,
   NewCallGoal,
   Script,
   SayGoal,
@@ -61,7 +62,20 @@ function sanitizeNewCall(raw: Record<string, unknown>): NewCallGoal {
   return raw as NewCallGoal;
 }
 
+function sanitizeHangup(raw: Record<string, unknown>): HangupGoal {
+  return raw as HangupGoal;
+}
+
 function sanitizeGoal(raw: Record<string, unknown>): Goal {
+  if (
+    Array.isArray(raw.fulfillment) &&
+    raw.fulfillment[0] &&
+    "voice_action" in (raw.fulfillment[0] as Record<string, unknown>) &&
+    (raw.fulfillment[0] as { voice_action?: unknown }).voice_action === "hang_up"
+  ) {
+    return sanitizeHangup(raw);
+  }
+
   if (
     Array.isArray(raw.fulfillment) &&
     raw.fulfillment[0] &&
@@ -171,6 +185,19 @@ export function scriptToFlowModel(script: Script): FlowModel {
       };
     }
 
+    if (isHangupGoal(goal)) {
+      return {
+        id,
+        type: "hangup",
+        data: {
+          name: goal.name,
+          prompt: firstMessage(goal.messages),
+          callResult: goal.fulfillment[0].call_result,
+        },
+        position: { x: 0, y: 0 },
+      };
+    }
+
     if (isSayGoal(goal)) {
       return {
         id,
@@ -216,11 +243,12 @@ export function scriptToFlowModel(script: Script): FlowModel {
 export function flowModelToScript(flow: FlowModel): Script {
   const introNode = flow.nodes.find((node) => node.type === "intro");
   const nodes = flow.nodes.filter(
-    (node) =>
-      node.type === "say" ||
-      node.type === "newcall" ||
-      node.type === "ask" ||
-      node.type === "subagent",
+      (node) =>
+        node.type === "say" ||
+        node.type === "newcall" ||
+        node.type === "hangup" ||
+        node.type === "ask" ||
+        node.type === "subagent",
   );
   const exitIds = new Set(
     flow.nodes.filter((node) => node.type === "exit").map((node) => node.id),
@@ -322,6 +350,21 @@ export function flowModelToScript(flow: FlowModel): Script {
           goal_type: node.data.static ? "say" : "say_generative",
           appended: node.data.waitForResponse ? undefined : true,
           transitions: target ? [{ target }] : [],
+        };
+      }
+
+      if (node.type === "hangup") {
+        return {
+          name: toFieldName(node.data.name),
+          goal_type: "say",
+          messages: node.data.prompt || undefined,
+          fulfillment: [
+            {
+              timing: "performed",
+              voice_action: "hang_up",
+              call_result: node.data.callResult || undefined,
+            },
+          ],
         };
       }
 
@@ -430,6 +473,7 @@ export function toFieldName(label: string): string {
 function isSayGoal(goal: Goal): goal is SayGoal {
   return (
     !isNewCallGoal(goal) &&
+    !isHangupGoal(goal) &&
     !isSubagentGoal(goal) &&
     (goal.goal_type === "say" || goal.goal_type === "say_generative")
   );
@@ -441,6 +485,14 @@ function isNewCallGoal(goal: Goal): goal is NewCallGoal {
 
 function isSubagentGoal(goal: Goal): goal is SubagentGoal {
   return goal.goal_type === "say_generative" && "repeat" in goal && goal.repeat;
+}
+
+function isHangupGoal(goal: Goal): goal is HangupGoal {
+  return (
+    "fulfillment" in goal &&
+    "voice_action" in goal.fulfillment[0] &&
+    goal.fulfillment[0].voice_action === "hang_up"
+  );
 }
 
 function firstMessage(messages: GoalMessages | undefined): string {

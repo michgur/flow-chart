@@ -36,6 +36,12 @@ export type NewCallNodeData = {
   idleMessages: { text: string; timeout: number }[];
 };
 
+export type HangupNodeData = {
+  name: string;
+  prompt: string;
+  callResult?: string;
+};
+
 export type NodeExit = {
   name: string;
   /** @deprecated */
@@ -77,6 +83,7 @@ export type IntroNode = Node<IntroNodeData, "intro">;
 export type GoalNode = Node<GoalNodeData, "goal">;
 export type SayNode = Node<SayNodeData, "say">;
 export type NewCallNode = Node<NewCallNodeData, "newcall">;
+export type HangupNode = Node<HangupNodeData, "hangup">;
 export type AskNode = Node<AskNodeData, "ask">;
 export type SubagentNode = Node<SubagentNodeData, "subagent">;
 export type ExitNode = Node<ExitNodeData, "exit">;
@@ -85,6 +92,7 @@ export type FlowNode =
   | GoalNode
   | SayNode
   | NewCallNode
+  | HangupNode
   | AskNode
   | SubagentNode
   | ExitNode;

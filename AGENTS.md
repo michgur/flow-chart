@@ -31,3 +31,5 @@ should just be an inline `const normalized = name === "" ? undefined : name ?? u
 - Same for variables, if it's only used once it could probably be inlined.
 - "You Might Not Need an Effect" - React docs.
 - Complex stateful logic goes in custom hooks.
+- I DESPISE overprotective code. Outside of user input, always assume state correctness. Prefer relying on react-flow for correct state, to writing custom guardrail logic.
+- I also HATE 'one line helper functions' that are only used once, and just obstruct the logic (just inline it, as said above).

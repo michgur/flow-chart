@@ -16,6 +16,7 @@ import { FlowInspector } from "./components/FlowInspector";
 import { GoalNode } from "./components/GoalNode";
 import { AskNode } from "./components/nodes/AskNode";
 import { ExitNode } from "./components/nodes/ExitNode";
+import { HangupNode } from "./components/nodes/HangupNode";
 import { IntroNode } from "./components/nodes/IntroNode";
 import { NewCallNode } from "./components/nodes/NewCallNode";
 import { SayNode } from "./components/nodes/SayNode";
@@ -37,6 +38,7 @@ const nodeTypes = {
   goal: GoalNode,
   say: SayNode,
   newcall: NewCallNode,
+  hangup: HangupNode,
   ask: AskNode,
   subagent: SubagentNode,
   exit: ExitNode,

@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { type FlowNode } from "../flow-model";
 import { GoalInspector } from "./GoalInspector";
 import { AskInspector } from "./inspector/AskInspector";
+import { HangupInspector } from "./inspector/HangupInspector";
 import { IntroInspector } from "./inspector/IntroInspector";
 import { NewCallInspector } from "./inspector/NewCallInspector";
 import { SayInspector } from "./inspector/SayInspector";
@@ -30,6 +31,8 @@ export function FlowInspector() {
       <SayInspector id={selection.id} />
     ) : selection.type === "newcall" ? (
       <NewCallInspector id={selection.id} />
+    ) : selection.type === "hangup" ? (
+      <HangupInspector id={selection.id} />
     ) : selection.type === "ask" ? (
       <AskInspector id={selection.id} />
     ) : selection.type === "subagent" ? (
