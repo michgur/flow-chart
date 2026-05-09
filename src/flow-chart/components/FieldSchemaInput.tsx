@@ -74,9 +74,7 @@ export function FieldSchemaInput({ value, onChange }: FieldSchemaInputProps) {
       <Switch
         label="Optional"
         value={value.optional ?? false}
-        onChange={(optional) =>
-          onChange({ ...value, optional: optional || undefined })
-        }
+        onChange={(optional) => onChange({ ...value, optional: optional || undefined })}
         className="-mx-2 px-2 font-medium"
       />
     </div>

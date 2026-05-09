@@ -76,10 +76,7 @@ export function IntroInspector({ id }: { id: string }) {
 
   return (
     <section className="space-y-3 p-3 text-sm">
-      <label
-        htmlFor="intro-title"
-        className="flex items-center gap-1 text-slate-700"
-      >
+      <label htmlFor="intro-title" className="flex items-center gap-1 text-slate-700">
         <UserCheckIcon className="size-5" weight="duotone" />
         <span id="intro-title" className="text-base font-medium">
           Call Intro
@@ -87,15 +84,13 @@ export function IntroInspector({ id }: { id: string }) {
       </label>
 
       <p className="text-xs text-slate-500">
-        Control what the agent says in specific scenarios, or leave blank to use
-        the default behaviors.
+        Control what the agent says in specific scenarios, or leave blank to use the default
+        behaviors.
       </p>
 
       {fields.map((field) => (
         <label key={field.key} className="flex cursor-text flex-col gap-1">
-          <span className="text-xs font-medium text-slate-500">
-            {field.label}
-          </span>
+          <span className="text-xs font-medium text-slate-500">{field.label}</span>
           <AutoResizeTextarea
             name={`intro-${field.key}`}
             value={draft[field.key]}

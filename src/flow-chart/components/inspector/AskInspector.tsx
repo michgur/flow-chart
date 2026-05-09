@@ -64,10 +64,7 @@ export function AskInspector({ id }: { id: string }) {
 
   return (
     <section className="space-y-3 p-3 text-sm">
-      <label
-        htmlFor="ask-name"
-        className="grid cursor-text grid-cols-[auto_1fr] items-center"
-      >
+      <label htmlFor="ask-name" className="grid cursor-text grid-cols-[auto_1fr] items-center">
         <QuestionMarkIcon className="size-6" weight="duotone" />
         <GoalNameInput id="ask-name" value={data.name} onChange={updateName} />
         <span className="col-start-2 px-2 text-xs text-slate-400">
@@ -110,9 +107,7 @@ export function AskInspector({ id }: { id: string }) {
       <FieldSchemaInput value={data.field} onChange={updateField} />
 
       <div className="space-y-2">
-        <span className="mb-2 block font-medium text-slate-700 select-none">
-          Transitions
-        </span>
+        <span className="mb-2 block font-medium text-slate-700 select-none">Transitions</span>
 
         <div className="space-y-3">
           {data.exits.map((exit, index) => (
@@ -123,21 +118,15 @@ export function AskInspector({ id }: { id: string }) {
               <div className="flex items-center gap-1">
                 <input
                   value={exit.name}
-                  onChange={(event) =>
-                    updateExit(index, { ...exit, name: event.target.value })
-                  }
+                  onChange={(event) => updateExit(index, { ...exit, name: event.target.value })}
                   onBlur={(event) =>
                     updateExit(index, {
                       ...exit,
-                      name:
-                        event.currentTarget.value
-                          .trim()
-                          .replace(/\s{2,}/g, " ") || "",
+                      name: event.currentTarget.value.trim().replace(/\s{2,}/g, " ") || "",
                     })
                   }
                   autoFocus={
-                    index === data.exits.length - 1 &&
-                    exit.name === `Transition ${index + 1}`
+                    index === data.exits.length - 1 && exit.name === `Transition ${index + 1}`
                   }
                   placeholder="Transition name"
                   className="min-w-0 flex-1 rounded-sm bg-transparent px-1.5 py-1 font-medium text-slate-900 outline-none"
@@ -155,15 +144,11 @@ export function AskInspector({ id }: { id: string }) {
                 name={`subagent-exit-${index}-prompt`}
                 value={exitConditions[index] ?? exit.conditions ?? ""}
                 onChange={(conditions) => {
-                  setExitConditions((ec) =>
-                    ec.map((c, i) => (i === index ? conditions : c)),
-                  );
+                  setExitConditions((ec) => ec.map((c, i) => (i === index ? conditions : c)));
                 }}
                 onBlur={(event) => {
                   const conditions = event.target.value;
-                  setExitConditions((ec) =>
-                    ec.map((c, i) => (i === index ? conditions : c)),
-                  );
+                  setExitConditions((ec) => ec.map((c, i) => (i === index ? conditions : c)));
                   updateExit(index, { ...exit, conditions });
                 }}
                 className="mt-1 w-full resize-none overflow-hidden rounded-sm bg-transparent p-0 px-1.5 py-1 text-slate-700 outline-none placeholder:text-slate-400 focus:outline-2"

@@ -65,7 +65,7 @@ export function JsonEditor({ model, onChange }: JsonEditorProps) {
       <div
         id={POPUP_ID}
         popover="auto"
-        className="fixed inset-1/2 open:flex h-[80%] w-[80%] max-w-6xl -translate-1/2 flex-col overflow-clip rounded-md border border-slate-300 bg-slate-50 backdrop:bg-slate-800/20"
+        className="fixed inset-1/2 h-[80%] w-[80%] max-w-6xl -translate-1/2 flex-col overflow-clip rounded-md border border-slate-300 bg-slate-50 backdrop:bg-slate-800/20 open:flex"
       >
         <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
           <h1 className="text-sm font-semibold tracking-[0.18em] text-slate-400 uppercase">
@@ -115,11 +115,7 @@ export function JsonEditor({ model, onChange }: JsonEditorProps) {
                 fontSize: 12,
                 lineHeight: 16,
               }}
-              loading={
-                <div className="p-4 text-xs text-slate-500">
-                  Loading editor...
-                </div>
-              }
+              loading={<div className="p-4 text-xs text-slate-500">Loading editor...</div>}
             />
           )}
         </div>

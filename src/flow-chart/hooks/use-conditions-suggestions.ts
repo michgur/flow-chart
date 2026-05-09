@@ -44,8 +44,7 @@ export function useConditionsSuggestions(
   const { vars } = useScriptVariables();
 
   return useMemo<ConditionsSuggestion[]>(() => {
-    if (conditions.length === 0 && defaultSuggestions)
-      return defaultSuggestions;
+    if (conditions.length === 0 && defaultSuggestions) return defaultSuggestions;
 
     const { type, content } = getLastToken(conditions);
     let sugg =
@@ -57,8 +56,7 @@ export function useConditionsSuggestions(
             ? logicalOperators
             : [];
     const query = content.toLowerCase().trim();
-    if (query.length > 0)
-      sugg = sugg.filter((value) => value.toLowerCase().startsWith(query));
+    if (query.length > 0) sugg = sugg.filter((value) => value.toLowerCase().startsWith(query));
     return sugg.map((value) => ({ value, label: value }));
   }, [conditions, vars, defaultSuggestions]);
 }

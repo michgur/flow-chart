@@ -19,10 +19,7 @@ export function SubagentInspector({ id }: { id: string }) {
   );
   const [prompt, setPrompt] = useState(data?.prompt ?? "");
 
-  useEffect(
-    () => setPrompts(data?.exits.map((exit) => exit.prompt) ?? []),
-    [data?.exits, id],
-  );
+  useEffect(() => setPrompts(data?.exits.map((exit) => exit.prompt) ?? []), [data?.exits, id]);
   useEffect(() => setPrompt(data?.prompt ?? ""), [data?.prompt, id]);
 
   if (!data) return null;
@@ -72,9 +69,7 @@ export function SubagentInspector({ id }: { id: string }) {
       </label>
 
       <div className="space-y-2">
-        <span className="mb-2 block font-medium text-slate-700 select-none">
-          Transitions
-        </span>
+        <span className="mb-2 block font-medium text-slate-700 select-none">Transitions</span>
 
         {
           <div className="space-y-3">
@@ -86,22 +81,17 @@ export function SubagentInspector({ id }: { id: string }) {
                 <div className="flex items-center gap-1">
                   <input
                     value={exit.name}
-                    onChange={(event) =>
-                      updateExit(index, { ...exit, name: event.target.value })
-                    }
+                    onChange={(event) => updateExit(index, { ...exit, name: event.target.value })}
                     onBlur={(event) =>
                       updateExit(index, {
                         ...exit,
                         name:
-                          event.currentTarget.value
-                            .trim()
-                            .replace(/\s{2,}/g, " ") ||
+                          event.currentTarget.value.trim().replace(/\s{2,}/g, " ") ||
                           `Transition ${index + 1}`,
                       })
                     }
                     autoFocus={
-                      index === data.exits.length - 1 &&
-                      exit.name === `Transition ${index + 1}`
+                      index === data.exits.length - 1 && exit.name === `Transition ${index + 1}`
                     }
                     placeholder="Transition name"
                     className="min-w-0 flex-1 rounded-sm bg-transparent px-1.5 py-1 font-medium text-slate-900 outline-none"
@@ -120,17 +110,13 @@ export function SubagentInspector({ id }: { id: string }) {
                   value={prompts[index] ?? exit.prompt}
                   onChange={(event) =>
                     setPrompts((prompts) =>
-                      prompts.map((prompt, i) =>
-                        i === index ? event.target.value : prompt,
-                      ),
+                      prompts.map((prompt, i) => (i === index ? event.target.value : prompt)),
                     )
                   }
                   onBlur={(event) => {
                     const prompt = event.target.value;
                     setPrompts((prompts) =>
-                      prompts.map((current, i) =>
-                        i === index ? prompt : current,
-                      ),
+                      prompts.map((current, i) => (i === index ? prompt : current)),
                     );
                     updateExit(index, { ...exit, prompt });
                   }}
@@ -147,10 +133,7 @@ export function SubagentInspector({ id }: { id: string }) {
           type="button"
           onClick={() =>
             updateNodeData(id, {
-              exits: [
-                ...data.exits,
-                { name: `Transition ${data.exits.length + 1}`, prompt: "" },
-              ],
+              exits: [...data.exits, { name: `Transition ${data.exits.length + 1}`, prompt: "" }],
             })
           }
           className={cn(

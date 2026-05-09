@@ -1,10 +1,5 @@
 import { QuestionMarkIcon } from "@phosphor-icons/react";
-import {
-  Handle,
-  Position,
-  type NodeProps,
-  useUpdateNodeInternals,
-} from "@xyflow/react";
+import { Handle, Position, type NodeProps, useUpdateNodeInternals } from "@xyflow/react";
 import { useEffect } from "react";
 
 import { goalDisplayName, type AskNode } from "../../flow-model";
@@ -22,10 +17,7 @@ export function AskNode({ id, selected, data }: NodeProps<AskNode>) {
   const updateNodeInternals = useUpdateNodeInternals();
   const fieldType = fieldTypeLabel[data.field.type];
 
-  useEffect(
-    () => updateNodeInternals(id),
-    [data.exits, id, updateNodeInternals],
-  );
+  useEffect(() => updateNodeInternals(id), [data.exits, id, updateNodeInternals]);
 
   return (
     <div

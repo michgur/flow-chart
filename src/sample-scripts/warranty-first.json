@@ -27,13 +27,14 @@
           "conditions": "agree-to-transfer = busy or agree-to-transfer = no"
         },
         {
+          "name": "not relevant",
+          "target": "hang-up",
+          "conditions": "agree-to-transfer = not relevant "
+        },
+        {
           "name": "yes",
           "target": "transfer-to-dealer",
           "conditions": "agree-to-transfer = yes "
-        },
-        {
-          "name": "not relevant",
-          "conditions": "agree-to-transfer = not relevant "
         }
       ]
     },
@@ -62,10 +63,12 @@
         },
         {
           "name": "yes",
+          "target": "schedule-callback",
           "conditions": "wants-a-callback = yes "
         },
         {
           "name": "no",
+          "target": "hang-up",
           "conditions": "wants-a-callback = no "
         }
       ]
@@ -122,6 +125,18 @@
         {
           "timing": "performed",
           "call_result": "converted"
+        }
+      ]
+    },
+    {
+      "name": "hang-up",
+      "goal_type": "say",
+      "messages": "Thank you for your time, goodbye!",
+      "fulfillment": [
+        {
+          "timing": "performed",
+          "voice_action": "hang_up",
+          "call_result": "disqualified"
         }
       ]
     }

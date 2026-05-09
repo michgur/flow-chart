@@ -89,9 +89,7 @@ export type HangupGoal = {
   name: string;
   goal_type: "say";
   messages?: GoalMessages;
-  fulfillment: [
-    { timing: "performed"; voice_action: "hang_up"; call_result?: string },
-  ];
+  fulfillment: [{ timing: "performed"; voice_action: "hang_up"; call_result?: string }];
 };
 
 export type Goal = SayGoal | AskGoal | SubagentGoal | NewCallGoal | HangupGoal;

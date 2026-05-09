@@ -12,9 +12,7 @@ function App() {
 
   useEffect(() => {
     if (sample)
-      void import(`./sample-scripts/${sample}.json`).then((s) =>
-        setModel(sanitizeScript(s)),
-      );
+      void import(`./sample-scripts/${sample}.json`).then((s) => setModel(sanitizeScript(s)));
   }, [sample]);
 
   return (

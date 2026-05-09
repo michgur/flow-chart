@@ -20,6 +20,7 @@ import { HangupNode } from "./components/nodes/HangupNode";
 import { IntroNode } from "./components/nodes/IntroNode";
 import { NewCallNode } from "./components/nodes/NewCallNode";
 import { SayNode } from "./components/nodes/SayNode";
+import { ScheduleCallbackNode } from "./components/nodes/ScheduleCallbackNode";
 import { SubagentNode } from "./components/nodes/SubagentNode";
 import type { Script } from "./data-model";
 import { type FlowEdge, type FlowEdgeType, type FlowNode } from "./flow-model";
@@ -35,6 +36,7 @@ export type FlowInstance = ReactFlowInstance<FlowNode, FlowEdge>;
 
 const nodeTypes = {
   intro: IntroNode,
+  "schedule-callback": ScheduleCallbackNode,
   goal: GoalNode,
   say: SayNode,
   newcall: NewCallNode,

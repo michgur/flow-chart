@@ -12,18 +12,18 @@ import type {
 import {
   generateTransitionEdgeId,
   INTRO_NODE_ID,
+  INTRO_BUSY_SOURCE_HANDLE_ID,
+  SCHEDULE_CALLBACK_NODE_ID,
   type AskNodeData,
   type FlowModel,
   type FlowNode,
   type IntroNodeData,
+  type FlowEdge,
 } from "./flow-model";
 import { invert } from "./lib/utils";
 import { syncExits } from "./sync-exits";
 
-const goalValueTypes: Record<
-  AskNodeData["field"]["type"],
-  AskGoal["value_type"]
-> = {
+const goalValueTypes: Record<AskNodeData["field"]["type"], AskGoal["value_type"]> = {
   boolean: "approval",
   enum: "selection",
   string: "custom",
@@ -42,6 +42,7 @@ const introMetadataKeys = {
 } as const;
 
 const introMetadataKeySet = new Set<string>(Object.values(introMetadataKeys));
+const SCHEDULE_CALLBACK_TARGET = "schedule-callback";
 
 function sanitizeSay(raw: Record<string, unknown>): SayGoal {
   return { ...raw, transitions: raw.transitions ?? [] } as SayGoal;
@@ -86,8 +87,7 @@ function sanitizeGoal(raw: Record<string, unknown>): Goal {
 
   const goalType = typeof raw.goal_type === "string" ? raw.goal_type : "ask";
   if (goalType === "say_generative" && raw.repeat) return sanitizeSubagent(raw);
-  else if (["ask", "ask_generative"].includes(goalType))
-    return sanitizeAsk(raw);
+  else if (["ask", "ask_generative"].includes(goalType)) return sanitizeAsk(raw);
   return sanitizeSay(raw);
 }
 
@@ -117,10 +117,14 @@ export function scriptToFlowModel(script: Script): FlowModel {
     goal,
   }));
   const idByName = new Map(goals.map(({ id, goal }) => [goal.name, id]));
-  const edges = goals.flatMap(({ id, goal }) =>
+  const edges: FlowEdge[] = goals.flatMap(({ id, goal }) =>
     ("transitions" in goal ? goal.transitions : []).flatMap((transition) => {
       const target =
-        transition.target !== undefined && idByName.get(transition.target);
+        transition.target === SCHEDULE_CALLBACK_TARGET
+          ? SCHEDULE_CALLBACK_NODE_ID
+          : transition.target !== undefined
+            ? idByName.get(transition.target)
+            : undefined;
       return target
         ? [
             {
@@ -133,6 +137,17 @@ export function scriptToFlowModel(script: Script): FlowModel {
         : [];
     }),
   );
+  edges.unshift({
+    id: generateTransitionEdgeId(),
+    source: INTRO_NODE_ID,
+    sourceHandle: INTRO_BUSY_SOURCE_HANDLE_ID,
+    target: SCHEDULE_CALLBACK_NODE_ID,
+    label: "Contact is Busy",
+    deletable: false,
+    selectable: false,
+    focusable: false,
+    reconnectable: false,
+  });
   if (goals[0]) {
     edges.unshift({
       id: generateTransitionEdgeId(),
@@ -148,6 +163,13 @@ export function scriptToFlowModel(script: Script): FlowModel {
     data: introData,
     position: { x: 0, y: 0 },
     draggable: false,
+    deletable: false,
+  };
+  const scheduleCallbackNode: FlowNode = {
+    id: SCHEDULE_CALLBACK_NODE_ID,
+    type: "schedule-callback",
+    data: {},
+    position: { x: 0, y: 0 },
     deletable: false,
   };
 
@@ -233,7 +255,10 @@ export function scriptToFlowModel(script: Script): FlowModel {
     };
   });
 
-  const flow = syncExits({ nodes: [introNode, ...nodes], edges });
+  const flow = syncExits({
+    nodes: [introNode, scheduleCallbackNode, ...nodes],
+    edges,
+  });
   return {
     nodes: layoutNodes(flow.nodes, flow.edges),
     edges,
@@ -243,19 +268,15 @@ export function scriptToFlowModel(script: Script): FlowModel {
 export function flowModelToScript(flow: FlowModel): Script {
   const introNode = flow.nodes.find((node) => node.type === "intro");
   const nodes = flow.nodes.filter(
-      (node) =>
-        node.type === "say" ||
-        node.type === "newcall" ||
-        node.type === "hangup" ||
-        node.type === "ask" ||
-        node.type === "subagent",
+    (node) =>
+      node.type === "say" ||
+      node.type === "newcall" ||
+      node.type === "hangup" ||
+      node.type === "ask" ||
+      node.type === "subagent",
   );
-  const exitIds = new Set(
-    flow.nodes.filter((node) => node.type === "exit").map((node) => node.id),
-  );
-  const nameById = new Map(
-    nodes.map((node) => [node.id, toFieldName(node.data.name)]),
-  );
+  const exitIds = new Set(flow.nodes.filter((node) => node.type === "exit").map((node) => node.id));
+  const nameById = new Map(nodes.map((node) => [node.id, toFieldName(node.data.name)]));
   const targetsFor = (source: string, handle: string | null) =>
     flow.edges.flatMap((edge) => {
       if (
@@ -266,7 +287,10 @@ export function flowModelToScript(flow: FlowModel): Script {
         return [];
       }
 
-      const target = nameById.get(edge.target);
+      const target =
+        edge.target === SCHEDULE_CALLBACK_NODE_ID
+          ? SCHEDULE_CALLBACK_TARGET
+          : nameById.get(edge.target);
       return target ? [target] : [];
     });
   const targetFor = (source: string, handle: string | null) => {
@@ -285,21 +309,14 @@ export function flowModelToScript(flow: FlowModel): Script {
     introTargetId === null
       ? nodes
       : (() => {
-          const firstIndex = nodes.findIndex(
-            (node) => node.id === introTargetId,
-          );
+          const firstIndex = nodes.findIndex((node) => node.id === introTargetId);
           if (firstIndex <= 0) return nodes;
           const firstNode = nodes[firstIndex];
           if (!firstNode) return nodes;
-          return [
-            firstNode,
-            ...nodes.filter((node) => node.id !== introTargetId),
-          ];
+          return [firstNode, ...nodes.filter((node) => node.id !== introTargetId)];
         })();
 
-  const defaultMetadata = introNode
-    ? fromIntroNodeData(introNode.data)
-    : undefined;
+  const defaultMetadata = introNode ? fromIntroNodeData(introNode.data) : undefined;
 
   return {
     goals: sortedNodes.map<Goal>((node) => {
@@ -406,9 +423,7 @@ export function flowModelToScript(flow: FlowModel): Script {
   };
 }
 
-function toIntroNodeData(
-  defaultMetadata: Script["default_metadata"],
-): IntroNodeData {
+function toIntroNodeData(defaultMetadata: Script["default_metadata"]): IntroNodeData {
   const metadata =
     defaultMetadata && typeof defaultMetadata === "object"
       ? (defaultMetadata as Record<string, unknown>)
@@ -418,8 +433,7 @@ function toIntroNodeData(
   const callIntro = metadata[introMetadataKeys.callIntro];
   const inboundWelcome = metadata[introMetadataKeys.inboundWelcome];
   const voicemail = metadata[introMetadataKeys.voicemail];
-  const speakerVerificationAcknowledge =
-    metadata[introMetadataKeys.speakerVerificationAcknowledge];
+  const speakerVerificationAcknowledge = metadata[introMetadataKeys.speakerVerificationAcknowledge];
 
   const rest = Object.fromEntries(
     Object.entries(metadata).filter(([key]) => !introMetadataKeySet.has(key)),
@@ -432,33 +446,25 @@ function toIntroNodeData(
     inboundWelcome: typeof inboundWelcome === "string" ? inboundWelcome : "",
     voicemail: typeof voicemail === "string" ? voicemail : "",
     speakerVerificationAcknowledge:
-      typeof speakerVerificationAcknowledge === "string"
-        ? speakerVerificationAcknowledge
-        : "",
+      typeof speakerVerificationAcknowledge === "string" ? speakerVerificationAcknowledge : "",
     metadataRest: rest,
   };
 }
 
-function fromIntroNodeData(
-  data: IntroNodeData,
-): Script["default_metadata"] | undefined {
+function fromIntroNodeData(data: IntroNodeData): Script["default_metadata"] | undefined {
   const metadata: Record<string, unknown> = { ...data.metadataRest };
 
   if (data.agentName) metadata[introMetadataKeys.agentName] = data.agentName;
-  if (data.companyName)
-    metadata[introMetadataKeys.companyName] = data.companyName;
+  if (data.companyName) metadata[introMetadataKeys.companyName] = data.companyName;
   if (data.callIntro) metadata[introMetadataKeys.callIntro] = data.callIntro;
-  if (data.inboundWelcome)
-    metadata[introMetadataKeys.inboundWelcome] = data.inboundWelcome;
+  if (data.inboundWelcome) metadata[introMetadataKeys.inboundWelcome] = data.inboundWelcome;
   if (data.voicemail) metadata[introMetadataKeys.voicemail] = data.voicemail;
   if (data.speakerVerificationAcknowledge) {
     metadata[introMetadataKeys.speakerVerificationAcknowledge] =
       data.speakerVerificationAcknowledge;
   }
 
-  return Object.keys(metadata).length > 0
-    ? (metadata as Script["default_metadata"])
-    : undefined;
+  return Object.keys(metadata).length > 0 ? (metadata as Script["default_metadata"]) : undefined;
 }
 
 export function toFieldName(label: string): string {
@@ -507,13 +513,8 @@ function askField(goal: AskGoal): AskNodeData["field"] {
   return {
     name: goal.name,
     type: fieldTypes[goal.value_type ?? "custom"],
-    enum:
-      goal.value_type === "selection"
-        ? goal.choices?.map((choice) => choice.name)
-        : undefined,
-    optional:
-      goal.transitions.some((transition) => transition.refusal_handler) ||
-      undefined,
+    enum: goal.value_type === "selection" ? goal.choices?.map((choice) => choice.name) : undefined,
+    optional: goal.transitions.some((transition) => transition.refusal_handler) || undefined,
     description: goal.validation_prompt,
   };
 }

@@ -21,7 +21,9 @@ export function HangupNode({ selected, data }: NodeProps<HangupNodeType>) {
         </span>
       </h4>
 
-      {data.prompt && <p className="line-clamp-3 overflow-hidden text-ellipsis text-rose-700/70">{data.prompt}</p>}
+      {data.prompt && (
+        <p className="line-clamp-3 overflow-hidden text-ellipsis text-rose-700/70">{data.prompt}</p>
+      )}
 
       {data.callResult && <span className="text-rose-800">Call result: {data.callResult}</span>}
     </div>

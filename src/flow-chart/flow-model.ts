@@ -1,6 +1,8 @@
 import type { Edge, Node } from "@xyflow/react";
 
 export const INTRO_NODE_ID = "intro";
+export const SCHEDULE_CALLBACK_NODE_ID = "schedule-callback";
+export const INTRO_BUSY_SOURCE_HANDLE_ID = "contact-busy";
 
 export type GoalNodeData = {
   name: string;
@@ -41,6 +43,8 @@ export type HangupNodeData = {
   prompt: string;
   callResult?: string;
 };
+
+export type ScheduleCallbackNodeData = Record<string, never>;
 
 export type NodeExit = {
   name: string;
@@ -84,11 +88,13 @@ export type GoalNode = Node<GoalNodeData, "goal">;
 export type SayNode = Node<SayNodeData, "say">;
 export type NewCallNode = Node<NewCallNodeData, "newcall">;
 export type HangupNode = Node<HangupNodeData, "hangup">;
+export type ScheduleCallbackNode = Node<ScheduleCallbackNodeData, "schedule-callback">;
 export type AskNode = Node<AskNodeData, "ask">;
 export type SubagentNode = Node<SubagentNodeData, "subagent">;
 export type ExitNode = Node<ExitNodeData, "exit">;
 export type FlowNode =
   | IntroNode
+  | ScheduleCallbackNode
   | GoalNode
   | SayNode
   | NewCallNode

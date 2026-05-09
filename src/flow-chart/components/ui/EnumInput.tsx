@@ -17,17 +17,13 @@ export function EnumInput({
   const [input, setInput] = useState("");
   const [focused, setFocused] = useState(false);
   const option = input.trim().replace(/\s{2,}/g, " ");
-  const exists = value.some(
-    (item) => item.toLowerCase() === option.toLowerCase(),
-  );
+  const exists = value.some((item) => item.toLowerCase() === option.toLowerCase());
 
   function addOption(raw: string) {
     const option = raw.trim().replace(/\s{2,}/g, " ");
     if (!option) return;
 
-    const exists = value.some(
-      (item) => item.toLowerCase() === option.toLowerCase(),
-    );
+    const exists = value.some((item) => item.toLowerCase() === option.toLowerCase());
     if (exists) return;
 
     onChange([...value, option]);

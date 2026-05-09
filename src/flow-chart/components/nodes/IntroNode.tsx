@@ -1,7 +1,7 @@
 import { UserCheckIcon } from "@phosphor-icons/react";
-import { Position, type NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 
-import type { IntroNode as IntroNodeType } from "../../flow-model";
+import { INTRO_BUSY_SOURCE_HANDLE_ID, type IntroNode as IntroNodeType } from "../../flow-model";
 import { cn } from "../../lib/utils";
 import { SourceHandle } from "../SourceHandle";
 
@@ -19,11 +19,17 @@ export function IntroNode({ selected }: NodeProps<IntroNodeType>) {
       </h4>
 
       <p className="text-slate-600">
-        The agent will handle pre-conversation steps and continue once the right person is
-        reached.
+        The agent will handle pre-conversation steps and continue once the right person is reached.
       </p>
 
       <SourceHandle position={Position.Bottom} />
+      <Handle
+        id={INTRO_BUSY_SOURCE_HANDLE_ID}
+        className="w-0! opacity-0"
+        type="source"
+        position={Position.Right}
+        isConnectable={false}
+      />
     </div>
   );
 }

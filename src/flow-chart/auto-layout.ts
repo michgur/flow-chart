@@ -1,6 +1,11 @@
 import * as dagre from "dagre";
 
-import type { FlowEdge, FlowNode } from "./flow-model";
+import {
+  INTRO_NODE_ID,
+  SCHEDULE_CALLBACK_NODE_ID,
+  type FlowEdge,
+  type FlowNode,
+} from "./flow-model";
 
 function nodeSize(node: FlowNode) {
   const width = node.type === "exit" ? 16 : 256;
@@ -32,6 +37,7 @@ export function layoutNodes(nodes: FlowNode[], edges: FlowEdge[]): FlowNode[] {
 
   // 2. Feed edges into Dagre
   edges.forEach((edge) => {
+    if (edge.source === INTRO_NODE_ID && edge.target === SCHEDULE_CALLBACK_NODE_ID) return;
     dagreGraph.setEdge(edge.source, edge.target);
   });
 

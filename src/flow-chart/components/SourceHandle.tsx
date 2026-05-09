@@ -14,10 +14,12 @@ type SourceHandleProps = {
 export function SourceHandle({ id, position = Position.Bottom, className }: SourceHandleProps) {
   const [open, setOpen] = useState(false);
   const handleRef = useRef<HTMLDivElement>(null);
-  const connections = useNodeConnections(
-    id === undefined ? { handleType: "source" } : { handleType: "source", handleId: id },
-  );
-  const canAdd = connections.length === 0;
+  const connections = useNodeConnections({
+    handleType: "source",
+    handleId: id,
+  });
+  const canAdd =
+    connections.filter((conn) => (conn.sourceHandle ?? null) === (id ?? null)).length === 0;
 
   return (
     <>

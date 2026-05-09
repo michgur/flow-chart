@@ -8,6 +8,7 @@ import { HangupInspector } from "./inspector/HangupInspector";
 import { IntroInspector } from "./inspector/IntroInspector";
 import { NewCallInspector } from "./inspector/NewCallInspector";
 import { SayInspector } from "./inspector/SayInspector";
+import { ScheduleCallbackInspector } from "./inspector/ScheduleCallbackInspector";
 import { SubagentInspector } from "./inspector/SubagentInspector";
 
 export function FlowInspector() {
@@ -31,6 +32,8 @@ export function FlowInspector() {
       <SayInspector id={selection.id} />
     ) : selection.type === "newcall" ? (
       <NewCallInspector id={selection.id} />
+    ) : selection.type === "schedule-callback" ? (
+      <ScheduleCallbackInspector />
     ) : selection.type === "hangup" ? (
       <HangupInspector id={selection.id} />
     ) : selection.type === "ask" ? (

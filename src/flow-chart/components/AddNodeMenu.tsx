@@ -50,7 +50,7 @@ export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddN
           }
         : {
             x: handlePosition.x,
-            y: handlePosition.y + 64,
+            y: handlePosition.y + 128,
           };
     const nextId = `${type}:${crypto.randomUUID()}`;
     const field = {

@@ -1,7 +1,4 @@
-import {
-  Autocomplete,
-  type AutocompleteRootChangeEventDetails,
-} from "@base-ui/react";
+import { Autocomplete, type AutocompleteRootChangeEventDetails } from "@base-ui/react";
 import { useCallback, useState, type FocusEventHandler } from "react";
 
 import {
@@ -33,11 +30,7 @@ export function ConditionInput({
 
   const onValueChange = useCallback(
     (change: string, event: AutocompleteRootChangeEventDetails) =>
-      onChange(
-        event.reason === "item-press"
-          ? acceptSuggestion(value, change)
-          : change,
-      ),
+      onChange(event.reason === "item-press" ? acceptSuggestion(value, change) : change),
     [onChange, value],
   );
 
@@ -77,11 +70,7 @@ export function ConditionInput({
       />
 
       <Autocomplete.Portal>
-        <Autocomplete.Positioner
-          className="z-50 outline-none"
-          align="start"
-          sideOffset={4}
-        >
+        <Autocomplete.Positioner className="z-50 outline-none" align="start" sideOffset={4}>
           <Autocomplete.Popup
             className={cn(
               "nodrag nopan w-(--anchor-width) overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-sm outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",
@@ -110,9 +99,7 @@ function acceptSuggestion(value: string, suggestion: string): string {
   const words = value.split(/\s+/);
   const lastWord = words.pop();
   if (!lastWord) return `${value}${suggestion} `;
-  let start = suggestion.startsWith(lastWord)
-    ? words.filter(Boolean).join(" ")
-    : value.trimEnd();
+  let start = suggestion.startsWith(lastWord) ? words.filter(Boolean).join(" ") : value.trimEnd();
   if (start.length > 0) start = `${start} `;
   return `${start}${suggestion} `;
 }
