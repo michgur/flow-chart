@@ -2,13 +2,14 @@ import {
   Autocomplete,
   type AutocompleteRootChangeEventDetails,
 } from "@base-ui/react";
-import { useCallback, useRef, useState, type FocusEventHandler } from "react";
+import { useCallback, useState, type FocusEventHandler } from "react";
 
 import {
   useConditionsSuggestions,
   type ConditionsSuggestion,
 } from "../../hooks/use-conditions-suggestions";
 import { cn } from "../../lib/utils";
+import { AutoResizeTextarea } from "./AutoResizeTextarea";
 
 type ConditionInputProps = {
   name?: string;
@@ -30,25 +31,13 @@ export function ConditionInput({
   const suggestions = useConditionsSuggestions(value, defaultSuggestions);
   const [open, setOpen] = useState(false);
 
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const onValueChange = useCallback(
-    (change: string, event: AutocompleteRootChangeEventDetails) => {
-      if (event.reason === "item-press") {
-        const prefix = value.trimEnd();
-        const spacer = prefix.length > 0 ? " " : "";
-        change = prefix.endsWith(change)
-          ? `${prefix} `
-          : `${prefix}${spacer}${change} `;
-      }
-      onChange(change);
-
-      const input = inputRef.current;
-      if (input)
-        setTimeout(() => {
-          input.scrollLeft = input.scrollWidth;
-        }, 10);
-    },
+    (change: string, event: AutocompleteRootChangeEventDetails) =>
+      onChange(
+        event.reason === "item-press"
+          ? acceptSuggestion(value, change)
+          : change,
+      ),
     [onChange, value],
   );
 
@@ -65,12 +54,18 @@ export function ConditionInput({
       }}
     >
       <Autocomplete.Input
+        render={(props) => <AutoResizeTextarea {...props} />}
         name={name}
-        ref={inputRef}
         onFocus={() => setOpen(true)}
+        onKeyDown={(evt) => {
+          if (evt.key === "Enter" && !open) {
+            evt.preventDefault();
+          }
+        }}
         onBlur={(evt) => {
-          if (evt.target.value.trim() !== value) {
-            onChange(evt.target.value.trim());
+          const trimmed = evt.currentTarget.value.trim();
+          if (trimmed !== value) {
+            onChange(trimmed);
           }
           onBlur?.(evt);
         }}
@@ -109,4 +104,15 @@ export function ConditionInput({
       </Autocomplete.Portal>
     </Autocomplete.Root>
   );
+}
+
+function acceptSuggestion(value: string, suggestion: string): string {
+  const words = value.split(/\s+/);
+  const lastWord = words.pop();
+  if (!lastWord) return `${value}${suggestion} `;
+  let start = suggestion.startsWith(lastWord)
+    ? words.filter(Boolean).join(" ")
+    : value.trimEnd();
+  if (start.length > 0) start = `${start} `;
+  return `${start}${suggestion} `;
 }

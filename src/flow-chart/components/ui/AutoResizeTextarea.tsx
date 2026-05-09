@@ -1,32 +1,55 @@
-import { useLayoutEffect, useRef, type TextareaHTMLAttributes } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useLayoutEffect,
+  useRef,
+  type TextareaHTMLAttributes,
+} from "react";
 
-type AutoResizeTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement>;
+type AutoResizeTextareaProps = TextareaHTMLAttributes<HTMLTextAreaElement> & {
+  type?: string;
+};
 
-export function AutoResizeTextarea({ onChange, style, value, ...props }: AutoResizeTextareaProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+export const AutoResizeTextarea = forwardRef<HTMLTextAreaElement, AutoResizeTextareaProps>(
+  function AutoResizeTextarea({ onChange, style, value, type: _type, ...props }, forwardedRef) {
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
 
-  useLayoutEffect(() => {
-    if (!textareaRef.current) {
-      return;
-    }
+    const setRefs = useCallback(
+      (node: HTMLTextAreaElement | null) => {
+        textareaRef.current = node;
 
-    resizeTextarea(textareaRef.current);
-  }, [value]);
+        if (typeof forwardedRef === "function") {
+          forwardedRef(node);
+        } else if (forwardedRef) {
+          forwardedRef.current = node;
+        }
+      },
+      [forwardedRef],
+    );
 
-  return (
-    <textarea
-      {...props}
-      ref={textareaRef}
-      value={value}
-      rows={1}
-      style={style}
-      onChange={(event) => {
-        resizeTextarea(event.currentTarget);
-        onChange?.(event);
-      }}
-    />
-  );
-}
+    useLayoutEffect(() => {
+      if (!textareaRef.current) {
+        return;
+      }
+
+      resizeTextarea(textareaRef.current);
+    }, [value]);
+
+    return (
+      <textarea
+        {...props}
+        ref={setRefs}
+        value={value}
+        rows={1}
+        style={style}
+        onChange={(event) => {
+          resizeTextarea(event.currentTarget);
+          onChange?.(event);
+        }}
+      />
+    );
+  },
+);
 
 function resizeTextarea(element: HTMLTextAreaElement) {
   element.style.height = "0px";

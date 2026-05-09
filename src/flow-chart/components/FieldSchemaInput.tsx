@@ -64,7 +64,7 @@ export function FieldSchemaInput({ value, onChange }: FieldSchemaInputProps) {
                 description: event.target.value || undefined,
               })
             }
-            placeholder="Describe what answer this field expects"
+            placeholder="Describe the answer"
             className="w-full resize-none overflow-hidden rounded-sm bg-slate-100 px-2 py-1.5 text-slate-900 outline-emerald-500 placeholder:text-slate-400 focus-within:bg-slate-50 focus-within:outline-2"
             spellCheck={true}
           />
@@ -74,7 +74,9 @@ export function FieldSchemaInput({ value, onChange }: FieldSchemaInputProps) {
       <Switch
         label="Optional"
         value={value.optional ?? false}
-        onChange={(optional) => onChange({ ...value, optional: optional || undefined })}
+        onChange={(optional) =>
+          onChange({ ...value, optional: optional || undefined })
+        }
         className="-mx-2 px-2 font-medium"
       />
     </div>
