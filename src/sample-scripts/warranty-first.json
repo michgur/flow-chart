@@ -1,0 +1,151 @@
+{
+  "goals": [
+    {
+      "name": "agree-to-transfer",
+      "display_name": "agree to transfer",
+      "messages": "I’m calling about the repair plan that was set up on your car. {vehicle} Registration number {reg_number:digits}, when you purchased it from {dealership?dealership?\\\"the dealership\\\"}. My system shows that your repair plan ends on {expiry_date:words}. Do you want to hear about the options you have to make sure you remain protected from expensive repair bills?",
+      "goal_type": "ask_generative",
+      "value_type": "selection",
+      "choices": [
+        {
+          "name": "not relevant"
+        },
+        {
+          "name": "busy"
+        },
+        {
+          "name": "no"
+        },
+        {
+          "name": "yes"
+        }
+      ],
+      "transitions": [
+        {
+          "name": "suggest callback",
+          "target": "wants-a-callback",
+          "conditions": "agree-to-transfer = busy or agree-to-transfer = no"
+        },
+        {
+          "name": "yes",
+          "target": "transfer-to-dealer",
+          "conditions": "agree-to-transfer = yes "
+        },
+        {
+          "name": "not relevant",
+          "conditions": "agree-to-transfer = not relevant "
+        }
+      ]
+    },
+    {
+      "name": "wants-a-callback",
+      "display_name": "wants a callback",
+      "messages": "how about I'll call you at a later time?",
+      "goal_type": "ask_generative",
+      "value_type": "selection",
+      "choices": [
+        {
+          "name": "yes"
+        },
+        {
+          "name": "no"
+        },
+        {
+          "name": "transfer now"
+        }
+      ],
+      "transitions": [
+        {
+          "name": "transfer now",
+          "target": "transfer-to-dealer",
+          "conditions": "wants-a-callback = transfer now "
+        },
+        {
+          "name": "yes",
+          "conditions": "wants-a-callback = yes "
+        },
+        {
+          "name": "no",
+          "conditions": "wants-a-callback = no "
+        }
+      ]
+    },
+    {
+      "name": "transfer-to-dealer",
+      "goal_type": "say",
+      "messages": "Let me transfer you to one of my specialists on the phone to discuss the renewal options, one moment.",
+      "uninterruptible": true,
+      "fulfillment": [
+        {
+          "timing": "triggered_once",
+          "new_call": {
+            "agent": "warranty-first-callcenter",
+            "from_number": "{phone}",
+            "phone_number": "{%transfer_number%}",
+            "pre_merge_message": "You are now connected.",
+            "parent_fail_message": "I'm sorry, but our team is currently busy. We'll have someone call you back shortly. Thank you!",
+            "contact_name": "{%company_name%}",
+            "check_dnc_registry": false,
+            "metadata": {
+              "client_contact_name": "{contact_name}",
+              "client_contact_full_name": "{contact_full_name}",
+              "client_phone": "{phone}"
+            },
+            "idle_messages": [
+              {
+                "text": "By the way, you planning to have this car for a while right?",
+                "timeout": 12
+              },
+              {
+                "text": "Almost there - they'll be able to show you all the available options that fit your budget and preferences.",
+                "timeout": 15
+              },
+              {
+                "text": "Thank you for your patience, this will only take another minute.",
+                "timeout": 20
+              },
+              {
+                "text": "We are still holding.",
+                "timeout": 20
+              },
+              {
+                "text": "Again Thank you for your patience, I'm still working to get them on the line",
+                "timeout": 20
+              },
+              {
+                "text": "Sorry about that.",
+                "timeout": 20
+              }
+            ]
+          }
+        },
+        {
+          "timing": "performed",
+          "call_result": "converted"
+        }
+      ]
+    }
+  ],
+  "default_metadata": {
+    "%transfer_number%": "+441733301218",
+    "_callback_number_": "+441733300417",
+    "%human_message%": "My name is {%agent_name%} from Warranty First, please call me back at {%agent_phone_number%:local_phone:digits}",
+    "%responses_reason_for_call%": "I am calling about your repair plan that was set up on your {vehicle}  registration number {reg_number:digits} that you purchased {dealership?\"at\"} {dealership?dealership}.",
+    "%responses_company_name%": "Warranty First - we provide car repair plans.",
+    "%responses_list_source%": "You have a repair plan with us that is due to end on {expiry_date:words}.",
+    "_vehicle": "Ford Focus",
+    "_dealership": "Joe's dealers",
+    "_expiry_date": "November 30th",
+    "expiry_date_iso": "2026-02-26T00:00:00.000Z",
+    "%average_repair_cost%": "1200",
+    "message_type_sent": "text message",
+    "_days_until_expiry": "8",
+    "_reg_number": "12",
+    "%nli_version%": 8,
+    "%agent_name%": "Megan",
+    "%company_name%": "Warranty First",
+    "%call_intro%": "Hi, this is {%agent_name%} calling from {%company_name%}",
+    "%voicemail_message%": "Hi, this is {%agent_name%} from Warranty First leaving a message for {contact_full_name}, regarding the repair plan on your {vehicle} registration number {reg_number:digits}. Your plan is due to end on {expiry_date:words}. Please return my call on {%agent_phone_number%:local_phone:digits} so that we can discuss your options. Thank you.",
+    "%speaker_verification_acknowledge%": "Great! hi {contact_name}"
+  }
+}

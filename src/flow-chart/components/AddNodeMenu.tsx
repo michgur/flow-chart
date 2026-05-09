@@ -1,11 +1,11 @@
 import { Menu } from "@base-ui/react/menu";
-import { QuestionMarkIcon, QuotesIcon, RobotIcon } from "@phosphor-icons/react";
+import { PhonePlusIcon, QuestionMarkIcon, QuotesIcon, RobotIcon } from "@phosphor-icons/react";
 import { Position, useNodeId, useReactFlow } from "@xyflow/react";
 import type { RefObject } from "react";
 
 import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
 
-type AddNodeType = "say" | "ask" | "subagent";
+type AddNodeType = "say" | "ask" | "subagent" | "newcall";
 
 type AddNodeMenuProps = {
   anchor: RefObject<HTMLDivElement | null>;
@@ -18,6 +18,7 @@ const options = [
   { type: "say", label: "Say", Icon: QuotesIcon },
   { type: "ask", label: "Ask", Icon: QuestionMarkIcon },
   { type: "subagent", label: "Subagent", Icon: RobotIcon },
+  { type: "newcall", label: "Add Call", Icon: PhonePlusIcon },
 ] satisfies { type: AddNodeType; label: string; Icon: typeof QuotesIcon }[];
 
 export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddNodeMenuProps) {
@@ -77,17 +78,35 @@ export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddN
               position,
               selected: true,
             }
-          : {
-              id: nextId,
-              type: "subagent",
-              data: {
-                name: "Subagent",
-                prompt: "",
-                exits: [{ name: "Done", prompt: "" }],
-              },
-              position,
-              selected: true,
-            };
+          : type === "subagent"
+            ? {
+                id: nextId,
+                type: "subagent",
+                data: {
+                  name: "Subagent",
+                  prompt: "",
+                  exits: [{ name: "Done", prompt: "" }],
+                },
+                position,
+                selected: true,
+              }
+            : {
+                id: nextId,
+                type: "newcall",
+                data: {
+                  name: "Add Call",
+                  static: true,
+                  prompt: "",
+                  agent: "",
+                  phoneNumber: "",
+                  preMergeMessage: undefined,
+                  parentFailMessage: undefined,
+                  brief: undefined,
+                  idleMessages: [],
+                },
+                position,
+                selected: true,
+              };
 
     setNodes((nodes) => [...nodes.map((node) => ({ ...node, selected: false })), nextNode]);
 

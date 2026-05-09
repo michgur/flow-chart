@@ -16,6 +16,8 @@ import { FlowInspector } from "./components/FlowInspector";
 import { GoalNode } from "./components/GoalNode";
 import { AskNode } from "./components/nodes/AskNode";
 import { ExitNode } from "./components/nodes/ExitNode";
+import { IntroNode } from "./components/nodes/IntroNode";
+import { NewCallNode } from "./components/nodes/NewCallNode";
 import { SayNode } from "./components/nodes/SayNode";
 import { SubagentNode } from "./components/nodes/SubagentNode";
 import type { Script } from "./data-model";
@@ -31,8 +33,10 @@ export type FlowChartProps = {
 export type FlowInstance = ReactFlowInstance<FlowNode, FlowEdge>;
 
 const nodeTypes = {
+  intro: IntroNode,
   goal: GoalNode,
   say: SayNode,
+  newcall: NewCallNode,
   ask: AskNode,
   subagent: SubagentNode,
   exit: ExitNode,

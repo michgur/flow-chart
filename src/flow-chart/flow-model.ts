@@ -1,14 +1,39 @@
 import type { Edge, Node } from "@xyflow/react";
 
+export const INTRO_NODE_ID = "intro";
+
 export type GoalNodeData = {
   name: string;
   messages?: string;
 };
+
+export type IntroNodeData = {
+  agentName: string;
+  companyName: string;
+  callIntro: string;
+  inboundWelcome: string;
+  voicemail: string;
+  speakerVerificationAcknowledge: string;
+  metadataRest: Record<string, unknown>;
+};
+
 export type SayNodeData = {
   name: string;
   static: boolean;
   prompt: string;
   waitForResponse: boolean;
+};
+
+export type NewCallNodeData = {
+  name: string;
+  static: boolean;
+  prompt: string;
+  agent: string;
+  phoneNumber: string;
+  preMergeMessage?: string;
+  parentFailMessage?: string;
+  brief?: string;
+  idleMessages: { text: string; timeout: number }[];
 };
 
 export type NodeExit = {
@@ -48,12 +73,21 @@ export type ExitNodeData = {
   name: string;
 };
 
+export type IntroNode = Node<IntroNodeData, "intro">;
 export type GoalNode = Node<GoalNodeData, "goal">;
 export type SayNode = Node<SayNodeData, "say">;
+export type NewCallNode = Node<NewCallNodeData, "newcall">;
 export type AskNode = Node<AskNodeData, "ask">;
 export type SubagentNode = Node<SubagentNodeData, "subagent">;
 export type ExitNode = Node<ExitNodeData, "exit">;
-export type FlowNode = GoalNode | SayNode | AskNode | SubagentNode | ExitNode;
+export type FlowNode =
+  | IntroNode
+  | GoalNode
+  | SayNode
+  | NewCallNode
+  | AskNode
+  | SubagentNode
+  | ExitNode;
 
 export type FlowEdgeType = "default" | "bezier";
 export type FlowEdge = Edge<Record<string, unknown>, FlowEdgeType>;

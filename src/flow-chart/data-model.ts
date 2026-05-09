@@ -1,6 +1,11 @@
 export type GoalName = string;
 export type ConditionDSL = string;
 
+export type GoalStructuredMessage = {
+  message: string;
+};
+export type GoalMessages = string | (GoalStructuredMessage | string)[];
+
 export type AskTransition = {
   name?: string;
   target?: GoalName;
@@ -20,7 +25,7 @@ export type AskGoal = {
   name: GoalName;
   display_name?: string;
   goal_type: "ask" | "ask_generative"; // static = goal_type === 'ask'
-  messages?: string | string[]; // array = take first item
+  messages?: GoalMessages; // array = take first item
   value_type: "approval" | "selection" | "custom" | "number"; // approval = boolean, selection = enum, custom = string
   validation_prompt?: string;
   choices?: { name: string }[]; // for selection
@@ -31,7 +36,7 @@ export type SayGoal = {
   name: GoalName;
   display_name?: string;
   goal_type: "say" | "say_generative"; // static = goal_type === 'say'
-  messages?: string | string[]; // array = take first item
+  messages?: GoalMessages; // array = take first item
   appended?: true; // omit to enable waitForResponse
   transitions: [SayTransition] | []; // always exactly one item
 };
@@ -39,7 +44,7 @@ export type SayGoal = {
 export type SubagentGoal = {
   name: GoalName;
   goal_type: "say_generative";
-  messages?: string | string[];
+  messages?: GoalMessages;
   repeat: true;
   transitions: {
     name: string;
@@ -48,7 +53,48 @@ export type SubagentGoal = {
   }[];
 };
 
-export type Goal = SayGoal | AskGoal | SubagentGoal;
+export type NewCallGoal = {
+  name: GoalName;
+  goal_type: "say" | "say_generative";
+  uninterruptible: true;
+  messages?: GoalMessages;
+  fulfillment: [
+    {
+      timing: "triggered_once";
+      new_call: {
+        agent: string;
+        from_number: "{phone}";
+        phone_number: string;
+        pre_merge_message?: string; // e.g. "You are now connected.";
+        parent_fail_message?: string; // e.g. "I'm sorry, but our team is currently busy. We'll have someone call you back shortly. Thank you!";
+        contact_name: "{%company_name%}";
+        check_dnc_registry: false;
+        metadata: {
+          client_contact_name: "{contact_name}";
+          client_contact_full_name: "{contact_full_name}";
+          client_phone: "{phone}";
+          brief?: string;
+        };
+        idle_messages: { text: string; timeout: number }[];
+      };
+    },
+    {
+      timing: "performed";
+      call_result: "converted";
+    },
+  ];
+};
+
+export type HangupGoal = {
+  name: string;
+  goal_type: "say";
+  messages?: GoalMessages;
+  fulfillment: [
+    { timing: "performed"; voice_action: "hang_up"; call_result?: string },
+  ];
+};
+
+export type Goal = SayGoal | AskGoal | SubagentGoal | NewCallGoal | HangupGoal;
 
 export type ScriptDefaultMetadata = {
   "%agent_name%"?: string;
