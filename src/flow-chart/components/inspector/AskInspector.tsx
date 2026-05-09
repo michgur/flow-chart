@@ -51,7 +51,15 @@ export function AskInspector({ id }: { id: string }) {
   };
 
   const removeExit = (index: number) => {
-    updateNodeData(id, { exits: data.exits.filter((_, i) => i !== index) });
+    const exits =
+      data.exits.length === 1
+        ? [
+            {
+              name: "",
+            },
+          ]
+        : data.exits.filter((_, i) => i !== index);
+    updateNodeData(id, { exits });
   };
 
   return (

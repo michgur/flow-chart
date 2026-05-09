@@ -13,10 +13,12 @@
     {
       "name": "main need",
       "goal_type": "ask_generative",
-      "value_type": "selection",
-      "messages": "The goal for today is just to clarify a few details so I can connect you to the right product consultant. By the way, this call is recorded. Start by asking the user, in their own words, what was the main trigger that brought them to monday. Continue inquiring to understand their main business objective, level of urgency, and maturity of their process.",
+      "value_type": "custom",
+      "validation_prompt": "Return a brief summary of the main business objective the user wants to solve with monday.com. If the user is explicitly asking about support, billing, or troubleshooting (not a new product need), return 'non-qualification request'. If not yet specified, return null",
+      "messages": "The goal for today is just to clarify a few details so I can connect you to the right product consultant. By the way, this call is recorded. Just to start — in your own words, what was the main trigger that brought you to monday? Continue inquiring about the main reason the user has contacted monday, identify the type of product the user is looking for (CRM, Dev, Service, or Work Mgmt), level of urgency and maturity of process.",
       "transitions": [
         {
+          "name": "",
           "target": "product type"
         }
       ]
@@ -25,6 +27,7 @@
       "name": "product type",
       "goal_type": "ask",
       "value_type": "selection",
+      "validation_prompt": "Choose Explorer CRM, Dev, Service, or Work Mgmt base on explicit user information. do not guess.",
       "messages": "Are you primarily looking for a CRM, Development, Service, or general Work Management solution?",
       "choices": [
         {
@@ -42,6 +45,7 @@
       ],
       "transitions": [
         {
+          "name": "",
           "target": "prospect type"
         }
       ]
@@ -50,6 +54,7 @@
       "name": "prospect type",
       "goal_type": "ask",
       "value_type": "selection",
+      "validation_prompt": "Choose Explorer vs Sprinter based on how the user responds:- Explorer = vague/high-level/just browsing.\n- Sprinter = specific/urgent/clear use-case",
       "messages": "Are you just browsing and exploring right now, or do you have a specific, urgent use-case you are trying to solve?",
       "choices": [
         {
@@ -61,6 +66,7 @@
       ],
       "transitions": [
         {
+          "name": "",
           "target": "workflow pain point"
         }
       ]
@@ -68,10 +74,17 @@
     {
       "name": "workflow pain point",
       "goal_type": "ask",
-      "value_type": "selection",
+      "value_type": "custom",
+      "validation_prompt": "The user described a workflow pain point, a specific process problem, or a product interest related to monday.com. Return a brief summary of the pain point or interest. If the user is asking about support, billing, or troubleshooting (not a new product need), return 'non-qualification request'.",
       "messages": "What’s the specific breaking point in your current process that you're hoping to address with monday?",
       "transitions": [
         {
+          "name": "non-qualification request",
+          "target": "soft_letdown",
+          "conditions": "workflow pain point = non-qualification request"
+        },
+        {
+          "name": "",
           "target": "current tools"
         }
       ]
@@ -79,16 +92,17 @@
     {
       "name": "current tools",
       "goal_type": "ask",
-      "value_type": "selection",
-      "messages": "What tools or software are you currently using to run this process today?",
+      "value_type": "custom",
+      "validation_prompt": "Return the software, tools, or platforms the user is currently using to manage their workflows. If none mentioned, return 'none mentioned'.",
+      "messages": "What are you using today to run this process?",
       "transitions": [
         {
-          "name": "to_gap",
+          "name": "explorer uses tools",
           "target": "current tools gap",
           "conditions": "current tools $any and prospect type = Explorer"
         },
         {
-          "name": "to_user_count",
+          "name": "",
           "target": "user count"
         }
       ]
@@ -96,10 +110,12 @@
     {
       "name": "current tools gap",
       "goal_type": "ask",
-      "value_type": "selection",
+      "value_type": "custom",
+      "validation_prompt": "Return what the user says is missing or not working with their current tools setup.",
       "messages": "What's missing or not working with that setup today?",
       "transitions": [
         {
+          "name": "",
           "target": "user count"
         }
       ]
@@ -107,49 +123,32 @@
     {
       "name": "user count",
       "goal_type": "ask",
-      "value_type": "selection",
+      "value_type": "number",
       "messages": "How many people would use monday day to day?",
       "transitions": [
         {
-          "name": "clarify_range",
-          "target": "user count range clarification",
-          "conditions": "!User provided a single number"
-        },
-        {
-          "name": "check_expansion",
+          "name": "below threshold",
           "target": "workflow collaboration scope",
-          "conditions": "user count < {number_of_users_to_qualify}"
+          "conditions": "user count < {number_of_users_to_qualify}",
+          "acknowledge": "Got it — thanks."
         },
         {
-          "name": "route",
-          "target": "qualification routing"
-        }
-      ]
-    },
-    {
-      "name": "user count range clarification",
-      "goal_type": "ask",
-      "value_type": "selection",
-      "messages": "Just to lock it in—what's the single number I should go with?",
-      "transitions": [
-        {
-          "name": "check_expansion",
-          "target": "workflow collaboration scope",
-          "conditions": "user count < {number_of_users_to_qualify}"
-        },
-        {
-          "name": "route",
-          "target": "qualification routing"
+          "name": "qualified",
+          "target": "enrichment intro",
+          "conditions": "user count >= {number_of_users_to_qualify}",
+          "acknowledge": "Got it — thanks."
         }
       ]
     },
     {
       "name": "workflow collaboration scope",
       "goal_type": "ask",
-      "value_type": "selection",
+      "value_type": "custom",
+      "validation_prompt": "Return whether the user's team works independently or needs to collaborate with other departments. Return 'independent' or 'cross-department'.",
       "messages": "Regarding the workflow—is this group working independently, or do they need to collaborate with other departments?",
       "transitions": [
         {
+          "name": "",
           "target": "expansion planned"
         }
       ]
@@ -158,61 +157,50 @@
       "name": "expansion planned",
       "goal_type": "ask",
       "value_type": "approval",
-      "messages": "Are you expecting the rollout to expand beyond this initial group to other teams?",
+      "messages": "Does that mean you're planning to onboard those other teams to monday as well?",
       "transitions": [
         {
-          "name": "get_timeline",
+          "name": "plans expansion",
           "target": "expansion timeline",
           "conditions": "expansion planned = yes"
         },
         {
-          "name": "route",
-          "target": "qualification routing"
+          "name": "no expansion",
+          "target": "soft_letdown"
         }
       ]
     },
     {
       "name": "expansion timeline",
       "goal_type": "ask",
-      "value_type": "selection",
-      "messages": "What's the timeline on that expansion—is it planned for the next 3 months, or is it further down the road?",
+      "value_type": "custom",
+      "validation_prompt": "when does the user planned to expand - any timeline or due date. If no timeline specified, return 'not specified'.",
+      "messages": "Is that rollout something planned for the next 3 months, or is that further down the road?",
       "transitions": [
         {
-          "name": "get_total",
+          "name": "within 3 months",
           "target": "total user count",
           "conditions": "expansion timeline $date_valid and expansion timeline $date_diff_lte 93"
         },
         {
-          "name": "route",
-          "target": "qualification routing"
+          "name": "beyond 3 months",
+          "target": "soft_letdown"
         }
       ]
     },
     {
       "name": "total user count",
       "goal_type": "ask",
-      "value_type": "selection",
+      "value_type": "number",
       "messages": "So including that next wave, what is the total user count we should plan for?",
       "transitions": [
         {
-          "target": "qualification routing"
-        }
-      ]
-    },
-    {
-      "name": "qualification routing",
-      "goal_type": "say_generative",
-      "repeat": true,
-      "messages": "You have now collected the qualification data. Make the routing decision internally without explaining it to the user. INTERNAL \"MATH\": TotalQualifiedUsers = user_count + confirmed 3-month expansion users. QUALIFIED if TotalQualifiedUsers >= {number_of_users_to_qualify} AND a workflow pain point was identified. UNQUALIFIED if TotalQualifiedUsers < {number_of_users_to_qualify} OR no clear need identified OR user refused to provide a number. Generate your decision.",
-      "transitions": [
-        {
-          "name": "transfer_enrichment",
-          "prompt": "Transfer the qualified prospect to the Enrichment stage after confirming both NEED and MATH.",
-          "target": "enrichment intro"
+          "name": "qualified",
+          "target": "enrichment intro",
+          "conditions": "total user count >= {number_of_users_to_qualify}"
         },
         {
-          "name": "transfer_letdown",
-          "prompt": "Transfer unqualified prospects or those who refuse to answer key questions to the Soft Letdown subagent.",
+          "name": "unqualified",
           "target": "soft_letdown"
         }
       ]
@@ -232,9 +220,10 @@
       "name": "has offshore employees",
       "goal_type": "ask",
       "value_type": "approval",
-      "messages": "So you mentioned your workflow needs — just so I have the right context, are you also using offshore employees?",
+      "messages": "So you mentioned {workflow pain point/\"your workflow needs\"} — are you also using offshore employees?",
       "transitions": [
         {
+          "name": "",
           "target": "industry"
         }
       ]
@@ -242,10 +231,12 @@
     {
       "name": "industry",
       "goal_type": "ask",
-      "value_type": "selection",
-      "messages": "What industry or sector does your company operate in?",
+      "value_type": "custom",
+      "validation_prompt": "Return the industry or sector the user's company operates in.",
+      "messages": "What industry are you in?",
       "transitions": [
         {
+          "name": "",
           "target": "is public company"
         }
       ]
@@ -254,15 +245,33 @@
       "name": "is public company",
       "goal_type": "ask",
       "value_type": "approval",
-      "messages": "Are you guys a public or private company?",
-      "transitions": []
+      "messages": "Are you guys public or private?",
+      "transitions": [
+        {
+          "name": "",
+          "acknowledge": "Perfect — I have what I need"
+        }
+      ]
     },
     {
       "name": "soft_letdown",
       "goal_type": "say_generative",
+      "messages": "PURPOSE\nPolitely disengage unqualified prospects while maintaining a positive brand experience.\nKeep it brief, helpful, and leave the door open for future engagement.\n\nCONVERSATION BEHAVIOR\n- Keep it short and sweet\n- Be genuinely helpful, not dismissive\n- Don't over-explain or justify the disqualification\n- Address everything the user said and drive the conversation to a natural conclusion\n- Only then, end the call efficiently\n\nSOFT LETDOWN APPROACH\n\nFor Insufficient User Count below {number_of_users_to_qualify}:\n\"Thanks for your time, {contact_name}. Based on what you've shared, I'd recommend checking out our free plan at monday.com—it's perfect for smaller teams and you can always scale up later.\"\n\nFor No Clear Need:\n\"I appreciate you taking the time to chat, {contact_name}. It sounds like you're in exploration mode right now. I'd suggest browsing our resource center at monday.com when you're ready to dig deeper into specific workflows.\"\n\nFor Refused to Answer:\n\"No worries, {contact_name}. I totally understand if you'd prefer to explore on your own first. Feel free to check out monday.com and reach out again when you're ready to chat specifics.\"\n\nFor Support/Billing Requests:\n\"Perfect—I've already raised that ticket for you, {contact_name}. Our support team will reach out via email shortly with next steps.\"\n\nCLOSING\nAlways end with:\n\"Thanks again, and have a great day!\"\n\nThen immediately end the call—no additional questions or offers.\n\nCONVERSATION LENGTH\nKeep the entire interaction under 30 seconds after the handoff.",
       "repeat": true,
-      "messages": "Politely disengage unqualified prospects while maintaining a positive brand experience. Keep it short, sweet, and helpful without over-explaining the disqualification. For insufficient users (< {number_of_users_to_qualify}), recommend the free plan at monday.com. For no clear need, suggest browsing the resource center. For support/billing, state that a ticket has been raised and support will email them. Address everything the user said, drive the conversation to a natural conclusion, and always end with 'Thanks again, and have a great day!' Keep the entire interaction under 30 seconds.",
-      "transitions": []
+      "transitions": [
+        {
+          "name": "hang_up",
+          "prompt": "End the call and hang up. Always address everything the user said first, then provide a natural, concise farewell to the user, then use this tool. Use when: (1) the conversation naturally concludes, (2) either party indicates they want to end the call, (3) you've reached the wrong person/number, (4) the user requests to hang up, or (5) you need to terminate the call for any reason."
+        }
+      ]
     }
-  ]
+  ],
+  "goals_update": {
+    "meeting slot": {
+      "options": {
+        "provider": "hubspot",
+        "meeting_link": "https://meetings-eu1.hubspot.com/oneai/demo"
+      }
+    }
+  }
 }
