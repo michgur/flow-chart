@@ -48,6 +48,15 @@ export type ConditionAst =
 
 const connectorWords = new Set(["and", "or"]);
 const twoCharOperators = ["<=", ">=", "!=", "<>", "><", "=="] as const;
+const binarySpecialOperators = new Set([
+  "$contains",
+  "$not_contains",
+  "$date_diff_eq",
+  "$date_diff_gt",
+  "$date_diff_gte",
+  "$date_diff_lt",
+  "$date_diff_lte",
+]);
 
 export function parseConditions(source: string): ConditionAst {
   const trimmed = source.trim();
@@ -297,7 +306,10 @@ export function getLastToken(source: string, cursor = source.length): LastToken 
         continue;
       }
       if (token.type === "special") {
-        mode = "logical operator";
+        mode = binarySpecialOperators.has(token.raw.toLowerCase())
+          ? "literal value"
+          : "logical operator";
+        literalValueHasToken = false;
       }
       continue;
     }

@@ -1,4 +1,7 @@
-import { Autocomplete, type AutocompleteRootChangeEventDetails } from "@base-ui/react";
+import {
+  Autocomplete,
+  type AutocompleteRootChangeEventDetails,
+} from "@base-ui/react";
 import { useCallback, useRef, useState, type FocusEventHandler } from "react";
 
 import {
@@ -34,7 +37,9 @@ export function ConditionInput({
       if (event.reason === "item-press") {
         const prefix = value.trimEnd();
         const spacer = prefix.length > 0 ? " " : "";
-        change = prefix.endsWith(change) ? `${prefix} ` : `${prefix}${spacer}${change} `;
+        change = prefix.endsWith(change)
+          ? `${prefix} `
+          : `${prefix}${spacer}${change} `;
       }
       onChange(change);
 
@@ -77,7 +82,11 @@ export function ConditionInput({
       />
 
       <Autocomplete.Portal>
-        <Autocomplete.Positioner className="z-50 outline-none" align="start" sideOffset={4}>
+        <Autocomplete.Positioner
+          className="z-50 outline-none"
+          align="start"
+          sideOffset={4}
+        >
           <Autocomplete.Popup
             className={cn(
               "nodrag nopan w-(--anchor-width) overflow-hidden rounded-md border border-slate-200 bg-slate-50 text-sm text-slate-700 shadow-sm outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0",

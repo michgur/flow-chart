@@ -6,9 +6,16 @@ import { goalDisplayName, type AskNode } from "../../flow-model";
 import { cn } from "../../lib/utils";
 import { TargetHandle } from "../TargetHandle";
 
+const fieldTypeLabel: Record<AskNode["data"]["field"]["type"], string> = {
+  boolean: "Yes / No",
+  enum: "Choice",
+  string: "Text",
+  number: "Number",
+};
+
 export function AskNode({ id, selected, data }: NodeProps<AskNode>) {
   const updateNodeInternals = useUpdateNodeInternals();
-  const fieldType = data.field.type === "boolean" ? "Yes / No" : "Choice";
+  const fieldType = fieldTypeLabel[data.field.type];
 
   useEffect(() => updateNodeInternals(id), [data.exits, id, updateNodeInternals]);
 

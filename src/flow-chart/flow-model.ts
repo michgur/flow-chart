@@ -19,17 +19,19 @@ export type NodeExit = {
   acknowledge?: string;
 };
 
+export type FieldSchema = {
+  name: string;
+  type: "boolean" | "enum" | "string" | "number";
+  enum?: string[];
+  optional?: boolean;
+  description?: string;
+};
+
 export type AskNodeData = {
   name: string;
   static: boolean;
   prompt: string;
-  field: {
-    name: string;
-    type: "boolean" | "enum" | "string" | "number";
-    enum?: string[];
-    optional?: boolean;
-    description?: string;
-  };
+  field: FieldSchema;
   exits: NodeExit[];
 };
 
@@ -76,11 +78,8 @@ export function fieldExits(field: AskNodeData["field"]): NodeExit[] {
           { name: "Yes", value: true },
           { name: "No", value: false },
         ]
-      : (field.enum?.filter(Boolean).map((name) => ({ name, value: name })) ??
-        []);
-  return field.optional
-    ? [...exits, { name: "Refused to answer", value: null }]
-    : exits;
+      : (field.enum?.filter(Boolean).map((name) => ({ name, value: name })) ?? []);
+  return field.optional ? [...exits, { name: "Refused to answer", value: null }] : exits;
 }
 
 export function goalDisplayName(goalName: string): string {

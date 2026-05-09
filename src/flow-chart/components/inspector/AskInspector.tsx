@@ -6,23 +6,15 @@ import { toFieldName } from "../../adapters";
 import { type AskNode, type FlowEdge } from "../../flow-model";
 import type { ConditionsSuggestion } from "../../hooks/use-conditions-suggestions";
 import { cn } from "../../lib/utils";
+import { FieldSchemaInput } from "../FieldSchemaInput";
 import { GoalNameInput } from "../GoalNameInput";
 import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
-import { ComboboxSelect, type ComboboxSelectOption } from "../ui/ComboboxSelect";
 import { ConditionInput } from "../ui/ConditionInput";
-import { EnumInput } from "../ui/EnumInput";
-import { Switch } from "../ui/Switch";
 import { ToggleGroup, type ToggleOption } from "../ui/ToggleGroup";
 
 type AskMode = "script" | "prompt";
 type Field = AskNode["data"]["field"];
-type FieldType = Field["type"];
 type AskExit = AskNode["data"]["exits"][number];
-
-const fieldTypeOptions = [
-  { value: "boolean", label: "Yes / No" },
-  { value: "enum", label: "Choice" },
-] satisfies ComboboxSelectOption<FieldType>[];
 
 export function AskInspector({ id }: { id: string }) {
   const { updateNodeData } = useReactFlow<AskNode, FlowEdge>();
@@ -42,7 +34,7 @@ export function AskInspector({ id }: { id: string }) {
 
   const mode: AskMode = data.static ? "script" : "prompt";
   const fieldName = toFieldName(data.name);
-  const updateField = (field: AskNode["data"]["field"]) => {
+  const updateField = (field: Field) => {
     const next = { ...field, name: fieldName };
     updateNodeData(id, { field: next });
   };
@@ -64,7 +56,10 @@ export function AskInspector({ id }: { id: string }) {
 
   return (
     <section className="space-y-3 p-3 text-sm">
-      <label htmlFor="ask-name" className="grid cursor-text grid-cols-[auto_1fr] items-center">
+      <label
+        htmlFor="ask-name"
+        className="grid cursor-text grid-cols-[auto_1fr] items-center"
+      >
         <QuestionMarkIcon className="size-6" weight="duotone" />
         <GoalNameInput id="ask-name" value={data.name} onChange={updateName} />
         <span className="col-start-2 px-2 text-xs text-slate-400">
@@ -104,97 +99,71 @@ export function AskInspector({ id }: { id: string }) {
         />
       </label>
 
-      <label className="space-y-1">
-        <span className="text-slate-500 select-none">Answer type</span>
-        <ComboboxSelect
-          value={data.field.type}
-          onChange={(type) =>
-            updateField(
-              type === "boolean"
-                ? { ...data.field, type, enum: undefined }
-                : { ...data.field, type },
-            )
-          }
-          options={fieldTypeOptions}
-          searchPlaceholder="Search response types"
-        />
-      </label>
-
-      {data.field.type === "enum" && (
-        <label className="block space-y-1">
-          <span className="text-slate-500 select-none">Options</span>
-          <EnumInput
-            value={data.field.enum ?? []}
-            onChange={(options) =>
-              updateField({
-                ...data.field,
-                enum: options.length > 0 ? options : undefined,
-              })
-            }
-          />
-        </label>
-      )}
-
-      <Switch
-        label="Optional"
-        value={data.field.optional ?? false}
-        onChange={(optional) => updateField({ ...data.field, optional: optional || undefined })}
-        className="-mx-2 px-2 font-medium"
-      />
+      <FieldSchemaInput value={data.field} onChange={updateField} />
 
       <div className="space-y-2">
-        <span className="mb-2 block font-medium text-slate-700 select-none">Transitions</span>
+        <span className="mb-2 block font-medium text-slate-700 select-none">
+          Transitions
+        </span>
 
-        {
-          <div className="space-y-3">
-            {data.exits.map((exit, index) => (
-              <div
-                key={index}
-                className="group rounded-sm bg-slate-100 p-2 outline-emerald-500 focus-within:bg-slate-50 focus-within:outline-2"
-              >
-                <div className="flex items-center gap-1">
-                  <input
-                    value={exit.name}
-                    onChange={(event) => updateExit(index, { ...exit, name: event.target.value })}
-                    onBlur={(event) =>
-                      updateExit(index, {
-                        ...exit,
-                        name: event.currentTarget.value.trim().replace(/\s{2,}/g, " ") || "",
-                      })
-                    }
-                    autoFocus={
-                      index === data.exits.length - 1 && exit.name === `Transition ${index + 1}`
-                    }
-                    placeholder="Transition name"
-                    className="min-w-0 flex-1 rounded-sm bg-transparent px-1.5 py-1 font-medium text-slate-900 outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => removeExit(index)}
-                    aria-label={`Remove ${exit.name || "transition"}`}
-                    className="cursor-pointer rounded-sm p-1.5 text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-rose-100 hover:text-rose-700"
-                  >
-                    <TrashIcon className="size-4" />
-                  </button>
-                </div>
-                <ConditionInput
-                  name={`subagent-exit-${index}-prompt`}
-                  value={exitConditions[index] ?? exit.conditions ?? ""}
-                  onChange={(conditions) => {
-                    setExitConditions((ec) => ec.map((c, i) => (i === index ? conditions : c)));
-                  }}
-                  onBlur={(event) => {
-                    const conditions = event.target.value;
-                    setExitConditions((ec) => ec.map((c, i) => (i === index ? conditions : c)));
-                    updateExit(index, { ...exit, conditions });
-                  }}
-                  className="mt-1 w-full resize-none overflow-hidden rounded-sm bg-transparent p-0 px-1.5 py-1 text-slate-700 outline-none placeholder:text-slate-400 focus:outline-2"
-                  defaultSuggestions={suggestConditions(data.field)}
+        <div className="space-y-3">
+          {data.exits.map((exit, index) => (
+            <div
+              key={index}
+              className="group rounded-sm bg-slate-100 p-2 outline-emerald-500 focus-within:bg-slate-50 focus-within:outline-2"
+            >
+              <div className="flex items-center gap-1">
+                <input
+                  value={exit.name}
+                  onChange={(event) =>
+                    updateExit(index, { ...exit, name: event.target.value })
+                  }
+                  onBlur={(event) =>
+                    updateExit(index, {
+                      ...exit,
+                      name:
+                        event.currentTarget.value
+                          .trim()
+                          .replace(/\s{2,}/g, " ") || "",
+                    })
+                  }
+                  autoFocus={
+                    index === data.exits.length - 1 &&
+                    exit.name === `Transition ${index + 1}`
+                  }
+                  placeholder="Transition name"
+                  className="min-w-0 flex-1 rounded-sm bg-transparent px-1.5 py-1 font-medium text-slate-900 outline-none"
                 />
+                <button
+                  type="button"
+                  onClick={() => removeExit(index)}
+                  aria-label={`Remove ${exit.name || "transition"}`}
+                  className="cursor-pointer rounded-sm p-1.5 text-slate-400 opacity-0 group-hover:opacity-100 hover:bg-rose-100 hover:text-rose-700"
+                >
+                  <TrashIcon className="size-4" />
+                </button>
               </div>
-            ))}
-          </div>
-        }
+              <ConditionInput
+                name={`subagent-exit-${index}-prompt`}
+                value={exitConditions[index] ?? exit.conditions ?? ""}
+                onChange={(conditions) => {
+                  setExitConditions((ec) =>
+                    ec.map((c, i) => (i === index ? conditions : c)),
+                  );
+                }}
+                onBlur={(event) => {
+                  const conditions = event.target.value;
+                  setExitConditions((ec) =>
+                    ec.map((c, i) => (i === index ? conditions : c)),
+                  );
+                  updateExit(index, { ...exit, conditions });
+                }}
+                className="mt-1 w-full resize-none overflow-hidden rounded-sm bg-transparent p-0 px-1.5 py-1 text-slate-700 outline-none placeholder:text-slate-400 focus:outline-2"
+                defaultSuggestions={suggestConditions(data.field)}
+              />
+            </div>
+          ))}
+        </div>
 
         <button
           type="button"
@@ -223,11 +192,29 @@ function suggestConditions(field: Field): ConditionsSuggestion[] {
           { label: "=Yes", value: `${field.name} = yes` },
           { label: "=No", value: `${field.name} = no` },
         ]
-      : (field.enum?.filter(Boolean).map((option) => ({
-          label: `=${option}`,
-          value: `${field.name} = ${option}`,
-        })) ?? []);
+      : field.type === "enum"
+        ? (field.enum?.filter(Boolean).map((option) => ({
+            label: `=${option}`,
+            value: `${field.name} = ${option}`,
+          })) ?? [])
+        : field.type === "string"
+          ? [
+              { label: "Any value", value: `${field.name} $any` },
+              { label: "=", value: `${field.name} =` },
+              { label: "!=", value: `${field.name} !=` },
+              { label: "Contains", value: `${field.name} $contains` },
+              { label: "Not contains", value: `${field.name} $not_contains` },
+            ]
+          : [
+              { label: "Any value", value: `${field.name} $any` },
+              { label: "=", value: `${field.name} =` },
+              { label: "!=", value: `${field.name} !=` },
+              { label: "<", value: `${field.name} <` },
+              { label: ">", value: `${field.name} >` },
+              { label: "<=", value: `${field.name} <=` },
+              { label: ">=", value: `${field.name} >=` },
+            ];
   return field.optional
-    ? [...sugg, { label: "=Refused to answer", value: `${field.name} = null` }]
+    ? [...sugg, { label: "Refused to answer", value: `${field.name} = null` }]
     : sugg;
 }
