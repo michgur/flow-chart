@@ -2,7 +2,7 @@ import Editor, { type Monaco } from "@monaco-editor/react";
 import { BracketsCurlyIcon } from "@phosphor-icons/react";
 import { useState } from "react";
 
-import { sanitizeScript, scriptToFlowModel } from "./flow-chart/adapters";
+import { sanitizeScript, scriptToFlow } from "./flow-chart/adapters/script";
 import type { Script } from "./flow-chart/data-model";
 
 type JsonEditorProps = {
@@ -39,7 +39,7 @@ export function JsonEditor({ model, onChange }: JsonEditorProps) {
     try {
       const parsed = JSON.parse(draft);
       const nextModel = sanitizeScript(parsed);
-      scriptToFlowModel(nextModel);
+      scriptToFlow(nextModel);
       onChange(nextModel);
       setStatus({ type: "success", message: "Updated successfully." });
     } catch (error) {

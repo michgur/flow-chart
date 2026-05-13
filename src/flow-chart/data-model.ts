@@ -6,6 +6,54 @@ export type GoalStructuredMessage = {
 };
 export type GoalMessages = string | (GoalStructuredMessage | string)[];
 
+export type NewCallConfig = {
+  agent: string;
+  from_number: "{phone}";
+  phone_number: string;
+  pre_merge_message?: string; // e.g. "You are now connected.";
+  parent_fail_message?: string; // e.g. "I'm sorry, but our team is currently busy. We'll have someone call you back shortly. Thank you!";
+  contact_name: "{%company_name%}";
+  check_dnc_registry: false;
+  metadata: {
+    client_contact_name: "{contact_name}";
+    client_contact_full_name: "{contact_full_name}";
+    client_phone: "{phone}";
+    brief?: string;
+  };
+  idle_messages?: { text: string; timeout: number }[];
+};
+
+export type ToolValues = {
+  [k: string]: any; // update call state with values
+  tool_result?: {
+    [k: string]: any; // return values back to the agent, AND update call state
+  };
+};
+
+export type ToolConfig = {
+  name: string;
+  enabled?: boolean;
+  description: string;
+  parameters: {
+    type: "object";
+    properties: Record<string, any>;
+    required: string[];
+  };
+  fulfillment: {
+    webhook?: {
+      url: string;
+      method: string;
+      mapping?: ToolValues;
+    };
+    text_message?: {
+      message: string;
+    };
+    voice_action?: "hang_up";
+    new_call?: NewCallConfig;
+    values?: ToolValues;
+  };
+};
+
 export type AskTransition = {
   name?: string;
   target?: GoalName;
@@ -30,6 +78,7 @@ export type AskGoal = {
   validation_prompt?: string;
   choices?: { name: string }[]; // for selection
   transitions: AskTransition[];
+  tools?: ToolConfig[];
 };
 
 export type SayGoal = {
@@ -51,6 +100,7 @@ export type SubagentGoal = {
     prompt: string;
     target?: GoalName;
   }[];
+  tools?: ToolConfig[];
 };
 
 export type NewCallGoal = {
@@ -61,22 +111,7 @@ export type NewCallGoal = {
   fulfillment: [
     {
       timing: "triggered_once";
-      new_call: {
-        agent: string;
-        from_number: "{phone}";
-        phone_number: string;
-        pre_merge_message?: string; // e.g. "You are now connected.";
-        parent_fail_message?: string; // e.g. "I'm sorry, but our team is currently busy. We'll have someone call you back shortly. Thank you!";
-        contact_name: "{%company_name%}";
-        check_dnc_registry: false;
-        metadata: {
-          client_contact_name: "{contact_name}";
-          client_contact_full_name: "{contact_full_name}";
-          client_phone: "{phone}";
-          brief?: string;
-        };
-        idle_messages: { text: string; timeout: number }[];
-      };
+      new_call: NewCallConfig;
     },
     {
       timing: "performed";

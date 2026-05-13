@@ -1,17 +1,9 @@
 import { Menu } from "@base-ui/react/menu";
-import {
-  PhoneDisconnectIcon,
-  PhonePlusIcon,
-  QuestionMarkIcon,
-  QuotesIcon,
-  RobotIcon,
-} from "@phosphor-icons/react";
 import { Position, useNodeId, useReactFlow } from "@xyflow/react";
 import type { RefObject } from "react";
 
 import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
-
-type AddNodeType = "say" | "ask" | "subagent" | "newcall" | "hangup";
+import { addNodeMenuOptions, createMenuNode } from "../node-menu";
 
 type AddNodeMenuProps = {
   anchor: RefObject<HTMLDivElement | null>;
@@ -20,19 +12,11 @@ type AddNodeMenuProps = {
   sourceHandleId?: string;
 };
 
-const options = [
-  { type: "say", label: "Say", Icon: QuotesIcon },
-  { type: "ask", label: "Ask", Icon: QuestionMarkIcon },
-  { type: "subagent", label: "Subagent", Icon: RobotIcon },
-  { type: "newcall", label: "Add Call", Icon: PhonePlusIcon },
-  { type: "hangup", label: "Hang Up", Icon: PhoneDisconnectIcon },
-] satisfies { type: AddNodeType; label: string; Icon: typeof QuotesIcon }[];
-
 export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddNodeMenuProps) {
   const nodeId = useNodeId();
   const { getNode, setEdges, setNodes } = useReactFlow<FlowNode, FlowEdge>();
 
-  function addNode(type: AddNodeType) {
+  function addNode(nodeType: FlowNode["type"]) {
     if (!nodeId) return;
 
     const source = getNode(nodeId);
@@ -52,82 +36,9 @@ export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddN
             x: handlePosition.x,
             y: handlePosition.y + 128,
           };
-    const nextId = `${type}:${crypto.randomUUID()}`;
-    const field = {
-      name: "answer",
-      type: "boolean" as const,
-    };
-    let nextNode: FlowNode;
-    if (type === "say") {
-      nextNode = {
-        id: nextId,
-        type: "say",
-        data: {
-          name: "Say",
-          static: true,
-          prompt: "",
-          waitForResponse: false,
-        },
-        position,
-        selected: true,
-      };
-    } else if (type === "ask") {
-      nextNode = {
-        id: nextId,
-        type: "ask",
-        data: {
-          name: "Ask",
-          static: true,
-          prompt: "",
-          field,
-          exits: [{ name: "", conditions: "" }],
-        },
-        position,
-        selected: true,
-      };
-    } else if (type === "subagent") {
-      nextNode = {
-        id: nextId,
-        type: "subagent",
-        data: {
-          name: "Subagent",
-          prompt: "",
-          exits: [{ name: "Done", prompt: "" }],
-        },
-        position,
-        selected: true,
-      };
-    } else if (type === "newcall") {
-      nextNode = {
-        id: nextId,
-        type: "newcall",
-        data: {
-          name: "Add Call",
-          static: true,
-          prompt: "",
-          agent: "",
-          phoneNumber: "",
-          preMergeMessage: undefined,
-          parentFailMessage: undefined,
-          brief: undefined,
-          idleMessages: [],
-        },
-        position,
-        selected: true,
-      };
-    } else {
-      nextNode = {
-        id: nextId,
-        type: "hangup",
-        data: {
-          name: "Hang Up",
-          prompt: "",
-          callResult: undefined,
-        },
-        position,
-        selected: true,
-      };
-    }
+    const nextId = `${nodeType}:${crypto.randomUUID()}`;
+    const nextNode = createMenuNode(nodeType, nextId, position);
+    if (!nextNode) return;
 
     setNodes((nodes) => [...nodes.map((node) => ({ ...node, selected: false })), nextNode]);
 
@@ -147,11 +58,11 @@ export function AddNodeMenu({ anchor, open, onOpenChange, sourceHandleId }: AddN
       <Menu.Portal>
         <Menu.Positioner anchor={anchor} sideOffset={8} className="outline-none">
           <Menu.Popup className="nodrag nopan transition-transform,scale,opacity z-50 min-w-32 origin-(--transform-origin) rounded-md bg-slate-50 p-1 text-sm text-slate-700 shadow-sm outline-none data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0">
-            {options.map(({ type, label, Icon }) => (
+            {addNodeMenuOptions.map(({ nodeType, label, Icon }) => (
               <Menu.Item
-                key={type}
+                key={nodeType}
                 onClick={() => {
-                  addNode(type);
+                  addNode(nodeType);
                   onOpenChange(false);
                 }}
                 className="flex cursor-pointer items-center gap-2 rounded-sm px-2.5 py-2 font-medium outline-none select-none data-highlighted:bg-slate-800 data-highlighted:text-slate-50"

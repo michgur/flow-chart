@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { type FlowEdge, type SubagentNode } from "../../flow-model";
 import { cn } from "../../lib/utils";
 import { GoalNameInput } from "../GoalNameInput";
+import { ToolsInput } from "../ToolsInput";
 import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
 
 type SubagentExit = SubagentNode["data"]["exits"][number];
@@ -67,6 +68,8 @@ export function SubagentInspector({ id }: { id: string }) {
           spellCheck={true}
         />
       </label>
+
+      <ToolsInput value={data.tools} onChange={(tools) => updateNodeData(id, { tools })} />
 
       <div className="space-y-2">
         <span className="mb-2 block font-medium text-slate-700 select-none">Transitions</span>

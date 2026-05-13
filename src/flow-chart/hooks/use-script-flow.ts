@@ -11,7 +11,7 @@ import {
 } from "@xyflow/react";
 import { useCallback, useReducer, useRef } from "react";
 
-import { flowModelToScript, scriptToFlowModel } from "../adapters";
+import { flowToScript, scriptToFlow } from "../adapters/script";
 import type { Script } from "../data-model";
 import { generateTransitionEdgeId, type FlowEdge, type FlowNode } from "../flow-model";
 import { syncExits } from "../sync-exits";
@@ -39,7 +39,7 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
   if (ref.current === null || !scriptsEqual(ref.current.value, value)) {
     ref.current = {
       value,
-      ...syncExits(scriptToFlowModel(value)),
+      ...syncExits(scriptToFlow(value)),
     };
   }
 
@@ -49,7 +49,7 @@ export function useScriptFlow(value: Script, onChange: OnChange) {
       if (ref.current) {
         Object.assign(ref.current, syncExits(ref.current));
         if (emit) {
-          const next = flowModelToScript(ref.current);
+          const next = flowToScript(ref.current);
           if (!scriptsEqual(next, ref.current.value)) {
             ref.current.value = next;
             onChange(next);

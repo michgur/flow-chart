@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { FlowChart } from "./flow-chart";
-import { sanitizeScript } from "./flow-chart/adapters";
+import { sanitizeScript } from "./flow-chart/adapters/script";
 import { ComboboxSelect } from "./flow-chart/components/ui/ComboboxSelect";
 import type { Script } from "./flow-chart/data-model";
 import { JsonEditor } from "./JsonEditor";

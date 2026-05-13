@@ -30,6 +30,13 @@ export function SubagentNode({ id, selected, data }: NodeProps<SubagentNodeType>
           {data.prompt}
         </p>
       )}
+      {data.tools.length > 0 && (
+        <div>
+          {data.tools.map((t) => (
+            <div>{t.name}</div>
+          ))}
+        </div>
+      )}
       {data.exits.map((exit) => (
         <Handle
           key={exit.name}

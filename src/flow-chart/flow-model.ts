@@ -1,5 +1,7 @@
 import type { Edge, Node } from "@xyflow/react";
 
+import type { ToolConfig } from "./data-model";
+
 export const INTRO_NODE_ID = "intro";
 export const SCHEDULE_CALLBACK_NODE_ID = "schedule-callback";
 export const INTRO_BUSY_SOURCE_HANDLE_ID = "contact-busy";
@@ -68,6 +70,7 @@ export type AskNodeData = {
   prompt: string;
   field: FieldSchema;
   exits: NodeExit[];
+  tools: ToolConfig[];
 };
 
 export type SubagentNodeData = {
@@ -77,6 +80,7 @@ export type SubagentNodeData = {
     name: string;
     prompt: string;
   }[];
+  tools: ToolConfig[];
 };
 
 export type ExitNodeData = {
@@ -102,6 +106,7 @@ export type FlowNode =
   | AskNode
   | SubagentNode
   | ExitNode;
+export type FlowNodeType = FlowNode["type"];
 
 export type FlowEdgeType = "default" | "bezier";
 export type FlowEdge = Edge<Record<string, unknown>, FlowEdgeType>;

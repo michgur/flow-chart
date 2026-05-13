@@ -2,12 +2,13 @@ import { PlusIcon, QuestionMarkIcon, TrashIcon } from "@phosphor-icons/react";
 import { useNodesData, useReactFlow } from "@xyflow/react";
 import { useEffect, useState } from "react";
 
-import { toFieldName } from "../../adapters";
+import { toFieldName } from "../../adapters/goals";
 import { type AskNode, type FlowEdge } from "../../flow-model";
 import type { ConditionsSuggestion } from "../../hooks/use-conditions-suggestions";
 import { cn } from "../../lib/utils";
 import { FieldSchemaInput } from "../FieldSchemaInput";
 import { GoalNameInput } from "../GoalNameInput";
+import { ToolsInput } from "../ToolsInput";
 import { AutoResizeTextarea } from "../ui/AutoResizeTextarea";
 import { ConditionInput } from "../ui/ConditionInput";
 import { ToggleGroup, type ToggleOption } from "../ui/ToggleGroup";
@@ -105,6 +106,8 @@ export function AskInspector({ id }: { id: string }) {
       </label>
 
       <FieldSchemaInput value={data.field} onChange={updateField} />
+
+      <ToolsInput value={data.tools} onChange={(tools) => updateNodeData(id, { tools })} />
 
       <div className="space-y-2">
         <span className="mb-2 block font-medium text-slate-700 select-none">Transitions</span>
