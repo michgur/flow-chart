@@ -28,6 +28,7 @@ function App() {
             { label: "amanda-2", value: "amanda-2" },
             { label: "amanda-3", value: "amanda-3" },
             { label: "warranty-first", value: "warranty-first" },
+            { label: "brightcar", value: "brightcar" },
           ]}
         />
         <JsonEditor model={model} onChange={setModel} />

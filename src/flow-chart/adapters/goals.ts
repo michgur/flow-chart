@@ -15,10 +15,7 @@ import {
 } from "../flow-model";
 import { invert } from "../lib/utils";
 
-const goalValueTypes: Record<
-  AskNodeData["field"]["type"],
-  AskGoal["value_type"]
-> = {
+const goalValueTypes: Record<AskNodeData["field"]["type"], AskGoal["value_type"]> = {
   boolean: "approval",
   enum: "selection",
   string: "custom",
@@ -131,10 +128,7 @@ const nodeToGoalByNodeType: {
 };
 
 const goalToNodeByNodeType: {
-  [NT in GoalNodeType]: (
-    id: string,
-    goal: NodeTypeToGoal[NT],
-  ) => Extract<FlowNode, { type: NT }>;
+  [NT in GoalNodeType]: (id: string, goal: NodeTypeToGoal[NT]) => Extract<FlowNode, { type: NT }>;
 } = {
   say: (id, goal) => ({
     id,
@@ -222,11 +216,7 @@ export function goalNodeType(goal: Goal): GoalNodeType {
     return "hangup";
   }
 
-  if (
-    "fulfillment" in goal &&
-    goal.fulfillment[0] &&
-    "new_call" in goal.fulfillment[0]
-  ) {
+  if ("fulfillment" in goal && goal.fulfillment[0] && "new_call" in goal.fulfillment[0]) {
     return "newcall";
   }
 
@@ -275,8 +265,7 @@ function resolveTransitionTarget(
 
 export function goalToNode(id: string, goal: Goal): FlowNode {
   const convert = goalToNodeByNodeType[goalNodeType(goal)];
-  if (convert === null)
-    throw new Error("goalToNode: unsupported goal node type");
+  if (convert === null) throw new Error("goalToNode: unsupported goal node type");
   return convert(id, goal as any);
 }
 
@@ -285,9 +274,7 @@ export function isGoalNode(node: FlowNode): node is GoalNode {
 }
 
 export function nodeToGoal(node: FlowNode, flow: FlowModel): Goal | null {
-  return isGoalNode(node)
-    ? nodeToGoalByNodeType[node.type](node as any, flow)
-    : null;
+  return isGoalNode(node) ? nodeToGoalByNodeType[node.type](node as any, flow) : null;
 }
 
 export function toFieldName(label: string): string {
@@ -313,13 +300,8 @@ function askField(goal: AskGoal): AskNodeData["field"] {
   return {
     name: goal.name,
     type: fieldTypes[goal.value_type ?? "custom"],
-    enum:
-      goal.value_type === "selection"
-        ? goal.choices?.map((choice) => choice.name)
-        : undefined,
-    optional:
-      goal.transitions.some((transition) => transition.refusal_handler) ||
-      undefined,
+    enum: goal.value_type === "selection" ? goal.choices?.map((choice) => choice.name) : undefined,
+    optional: goal.transitions.some((transition) => transition.refusal_handler) || undefined,
     description: goal.validation_prompt,
   };
 }

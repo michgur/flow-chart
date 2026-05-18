@@ -1,0 +1,134 @@
+{
+  "goals": [
+    {
+      "name": "good-time-to-chat",
+      "display_name": "Good Time to Chat",
+      "messages": "I wanted to give you a quick courtesy call regarding the finance application you made yesterday, is now a good time to chat?",
+      "goal_type": "ask",
+      "value_type": "approval",
+      "transitions": [
+        {
+          "name": "good time",
+          "target": "approval-good-news",
+          "conditions": "intro = yes"
+        },
+        {
+          "name": "bad time",
+          "target": "schedule-callback",
+          "conditions": "intro = no"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "approval-good-news",
+      "display_name": "approval good news",
+      "messages": "Perfect. The good news is your finance has already been approved and we’ve verified your income, so we’re nearly there. The only thing we need to get things moving is a copy of your driving licence.",
+      "goal_type": "say",
+      "transitions": [
+        {
+          "target": "vehicle-type"
+        }
+      ]
+    },
+    {
+      "name": "vehicle-type",
+      "display_name": "vehicle type",
+      "messages": "Just so I can point you in the right direction, what type of vehicle are you thinking of? Something smaller and economical, or maybe something a bit bigger and more practical?",
+      "goal_type": "ask",
+      "value_type": "custom",
+      "validation_prompt": "Extract the type or size of vehicle the user is looking for.",
+      "transitions": [
+        {
+          "name": "",
+          "target": "vehicle-usage"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "vehicle-usage",
+      "display_name": "vehicle usage",
+      "messages": "Are you mainly looking for something to get around town, or more for longer trips and family use?",
+      "goal_type": "ask",
+      "value_type": "custom",
+      "validation_prompt": "Extract the primary use-case for the vehicle (e.g., city driving, long trips, family).",
+      "transitions": [
+        {
+          "name": "",
+          "target": "preferred-style"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "preferred-style",
+      "display_name": "preferred style",
+      "messages": "Do you have a preferred style in mind, for example hatchback, SUV, or something sportier?",
+      "goal_type": "ask",
+      "value_type": "custom",
+      "validation_prompt": "Extract the preferred style of vehicle (hatchback, SUV, sporty, etc).",
+      "transitions": [
+        {
+          "name": "",
+          "target": "fuel-vs-comfort"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "fuel-vs-comfort",
+      "display_name": "fuel vs comfort",
+      "messages": "Is fuel efficiency important to you, or are you looking more for comfort and space?",
+      "goal_type": "ask",
+      "value_type": "custom",
+      "validation_prompt": "Extract whether the user prioritizes fuel efficiency or comfort/space.",
+      "transitions": [
+        {
+          "name": "",
+          "target": "monthly-budget"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "monthly-budget",
+      "display_name": "monthly budget",
+      "messages": "How much are you happy to pay each month for the new vehicle? If you aren't sure, are we talking £200 to £300 a month, or closer to £400 or £500 a month?",
+      "goal_type": "ask",
+      "value_type": "custom",
+      "validation_prompt": "Extract the target monthly budget for the vehicle.",
+      "transitions": [
+        {
+          "name": "",
+          "target": "closing"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "closing",
+      "goal_type": "say_generative",
+      "messages": "Wrap up the call positively. Tell the customer: 'Once we’ve got that licence, we can finalise everything and you’ll be ready to choose the right car with the dealership. I’ll keep things simple and guide you through if needed.' Say goodbye and end the call.",
+      "repeat": true,
+      "transitions": [
+        {
+          "name": "hang_up",
+          "prompt": "End the call after delivering the final next steps and saying goodbye.",
+          "target": "hang-up"
+        }
+      ],
+      "tools": []
+    },
+    {
+      "name": "hang-up",
+      "goal_type": "say",
+      "fulfillment": [
+        {
+          "timing": "performed",
+          "voice_action": "hang_up"
+        }
+      ]
+    }
+  ]
+}
